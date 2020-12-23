@@ -1,0 +1,7 @@
+Questions: What are exceptions and what problem do they solve?
+
+Exceptions offer a way to recover from error conditions so the program doesn't
+stop executing when an error is encountered. Instead it will handle the exception
+by running code after the "rescue" keyword.
+
+Note after reading given solution: use the wording "flow control"

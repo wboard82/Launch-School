@@ -1,0 +1,17 @@
+welcome: |+
+  ************************************
+  ** Welcome to the loan calculator **
+  ************************************
+
+principal_prompt: "What is the loan amount?"
+reprompt_principal: "Please enter a positive number for the loan amount."
+apr_prompt: "What is the APR? (e.g. 5.5%)"
+reprompt_apr: "APR must be a non-negative number."
+term_prompt: "What is the length of the loan in months?"
+reprompt_term: "Length of loan must be a whole number of months."
+another: "Would you like to perform another calculation? (y/N)"
+goodbye: "Thank you for using loan calculator. Goodbye!"
+monthly_payment: "Monthly payment...$" 
+total_payed:     "Total payed.......$" 
+total_interest:  "Total interest....$" 
+results: "\nFor a %{term} month loan of $%{principal} at %{apr}"

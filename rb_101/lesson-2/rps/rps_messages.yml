@@ -1,0 +1,29 @@
+you_chose: "\nYou chose: %{p1}"
+comp_chose: "Computer chose: %{p2}\n"
+you_won: "You won this round. %{p1} beats %{p2}."
+comp_won: "Computer won this round. %{p2} beats %{p1}."
+tie: "This round is a tie. Both players played %{p1}."
+display_score: "\nCurrent Score:\nYou: %{user_score}\nComputer: %{comp_score}\n"
+you_are_first: "\nYou were the first player to 5 points.\n\n"
+you_are_gw: |+
+  *******************************************************
+  ***          YOU ARE THE GRAND WINNER!!             ***
+  *******************************************************
+comp_was_first: "\nThe computer was first to reach 5 points.\n\n"
+comp_is_gw: |+
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  ~~~        The computer is the Grand Winner.        ~~~
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+welcome: |+
+  *** Welcome to Rock, Paper, Scissors, Lizard, Spock! ***
+
+  You are playing against the computer.
+  First player to 5 points is the GRAND WINNER!
+
+
+next_round: "Press ENTER to play next round"
+play_again: "Would you like to play again? (y/n)"
+goodbye: "\nThanks for playing. Goodbye!"
+invalid_choice: "'%{input}' is an invalid choice. Please try again."
+choose_one: "Please choose one:"
+invalid_yes_no: 'Invalid input. Please enter yes or no (y/n).'

@@ -1,0 +1,40 @@
+1. a method that returns the sum of two integers
+
+Get number1 from the user.
+Get number2 from the user.
+Add number1 to number2.
+-----
+START
+  GET number1
+  GET number2
+  SET ans = number1 + number2
+  PRING ans
+END
+---------------------------------
+2. a method that takes an array of strings, and returns a string that is all those strings concatenated together
+
+START
+  # Given an array of strings (arr)
+  SET new_string = ''
+  SET iterator = 0
+
+  WHILE iterator < length of arr
+    concatenate current position of arr onto new_string
+    
+  PRINT new_string
+END
+
+---------------------------------------------------------
+3. a method that takes an array of integers, and returns a new array with every other element
+
+START
+  # Given an array of integers (arr)
+  SET iterator = 0
+  SET new_array = []
+
+  WHILE iterator < length of arr
+    IF iterator is odd
+      add current position value to new_array
+
+  PRINT new_array
+END
