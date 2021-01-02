@@ -1,10 +1,11 @@
 require 'pry'
 
 class Player
-  attr_accessor :move, :name, :score
+  attr_accessor :move, :name, :score, :history
 
   def initialize
     @score = 0
+    @history = []
     set_name
   end
 
@@ -14,6 +15,17 @@ class Player
 
   def increment_score
     self.score += 1
+  end
+
+  def record_move
+    history << move.value
+  end
+
+  def display_history
+    puts "#{self} played these moves:"
+    history.each_with_index do |move, index|
+      puts "#{index + 1}. #{move}"
+    end
   end
 end
 
@@ -38,6 +50,7 @@ class Human < Player
       puts "Sorry, invalid choice."
     end
     self.move = Move.new_subclass(choice)
+    record_move
   end
 end
 
@@ -48,6 +61,7 @@ class Computer < Player
 
   def choose
     self.move = Move.new_subclass(Move::VALUES.sample)
+    record_move
   end
 end
 
@@ -143,7 +157,7 @@ end
 
 
 class RPSGame
-  attr_accessor :human, :computer, :winner
+  attr_accessor :human, :computer, :winner, :history
 
   def initialize
     @human = Human.new
@@ -175,6 +189,9 @@ class RPSGame
       display_score
       break unless play_again?
     end
+
+    human.display_history
+    computer.display_history
 
     display_goodbye_message
   end
