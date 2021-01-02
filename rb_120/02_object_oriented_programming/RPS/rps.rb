@@ -1,12 +1,12 @@
 class Player
   attr_accessor :move, :name
 
-  def initialize(player_type = :human)
+  def initialize
     set_name
   end
 
   def to_s
-    self.name
+    name
   end
 end
 
@@ -52,21 +52,21 @@ class Move
   VALUES = ['rock', 'paper', 'scissors']
 
   MOVE_RESULTS = {
-    'rock' => {'rock' => 0, 'scissors' => 1, 'paper' => -1},
-    'paper' => {'rock' => 1, 'scissors' => -1, 'paper' => 0},
-    'scissors' => {'rock' => -1, 'scissors' => 0, 'paper' => 1}
+    'rock' => { 'rock' => 0, 'scissors' => 1, 'paper' => -1 },
+    'paper' => { 'rock' => 1, 'scissors' => -1, 'paper' => 0 },
+    'scissors' => { 'rock' => -1, 'scissors' => 0, 'paper' => 1 }
   }
-                  
+
   def initialize(move)
     @move = move
   end
 
   def <=>(other)
-    MOVE_RESULTS[self.move][other.move]
+    MOVE_RESULTS[move][other.move]
   end
 
   def to_s
-    self.move
+    move
   end
 end
 
@@ -79,7 +79,6 @@ end
 def compare(move1, move2)
   # probably needs to use the Rule class
 end
-
 
 class RPSGame
   attr_accessor :human, :computer
@@ -99,7 +98,7 @@ class RPSGame
       puts "Sorry, must be y or n."
     end
 
-    return answer == 'y'
+    answer == 'y'
   end
 
   def play
