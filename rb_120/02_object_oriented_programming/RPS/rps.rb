@@ -4,6 +4,10 @@ class Player
   def initialize(player_type = :human)
     set_name
   end
+
+  def to_s
+    self.name
+  end
 end
 
 class Human < Player
@@ -23,10 +27,10 @@ class Human < Player
     loop do
       puts "Please choose rock, paper, or scissors:"
       choice = gets.chomp
-      break if ['rock', 'paper', 'scissors'].include? choice
+      break if Move::VALUES.include? choice
       puts "Sorry, invalid choice."
     end
-    self.move = choice
+    self.move = Move.new(choice)
   end
 end
 
@@ -36,13 +40,33 @@ class Computer < Player
   end
 
   def choose
-    self.move = ['rock', 'paper', 'scissors'].sample
+    self.move = Move.new(Move::VALUES.sample)
   end
 end
 
 class Move
-  def initialize
-    # Rock, Paper, or Scissor?
+  attr_reader :move
+
+  include Comparable
+
+  VALUES = ['rock', 'paper', 'scissors']
+
+  MOVE_RESULTS = {
+    'rock' => {'rock' => 0, 'scissors' => 1, 'paper' => -1},
+    'paper' => {'rock' => 1, 'scissors' => -1, 'paper' => 0},
+    'scissors' => {'rock' => -1, 'scissors' => 0, 'paper' => 1}
+  }
+                  
+  def initialize(move)
+    @move = move
+  end
+
+  def <=>(other)
+    MOVE_RESULTS[self.move][other.move]
+  end
+
+  def to_s
+    self.move
   end
 end
 
@@ -92,30 +116,21 @@ class RPSGame
   end
 
   def display_welcome_message
-    puts "Welcome to Rock, Paper, Scissors!."
+    puts "Welcome, #{human}. Get ready to play Rock, Paper, Scissors!"
   end
 
   def display_winner
-    puts "#{human.name} chose #{human.move}."
-    puts "#{computer.name} chose #{computer.move}."
-    case human.move
-    when 'rock'
-      puts "It's a tie!" if computer.move == 'rock'
-      puts "#{human.name} won!" if computer.move == 'scissors'
-      puts "#{computer.name} won!" if computer.move == 'paper'
-    when 'scissors'
-      puts "It's a tie!" if computer.move == 'scissors'
-      puts "#{human.name} won!" if computer.move == 'paper'
-      puts "#{computer.name} won!" if computer.move == 'rock'
-    when 'paper'
-      puts "It's a tie!" if computer.move == 'paper'
-      puts "#{human.name} won!" if computer.move == 'rock'
-      puts "#{computer.name} won!" if computer.move == 'scissors'
+    puts "#{human} chose #{human.move}."
+    puts "#{computer} chose #{computer.move}."
+    case human.move <=> computer.move
+    when 1 then puts "#{human} won!"
+    when -1 then puts "#{computer} won!"
+    when 0 then puts "It's a tie!"
     end
   end
 
   def display_goodbye_message
-    puts "Thank you for playing Rock, Paper, Scissors. Goodbye!"
+    puts "Thank you for playing Rock, Paper, Scissors. Goodbye, #{human}!"
   end
 end
 
