@@ -37,7 +37,7 @@ class Human < Player
       break if Move::VALUES.include? choice
       puts "Sorry, invalid choice."
     end
-    self.move = Move.new(choice)
+    self.move = Move.new_subclass(choice)
   end
 end
 
@@ -47,7 +47,7 @@ class Computer < Player
   end
 
   def choose
-    self.move = Move.new(Move::VALUES.sample)
+    self.move = Move.new_subclass(Move::VALUES.sample)
   end
 end
 
@@ -55,6 +55,16 @@ class Move
   attr_reader :value
 
   VALUES = ['rock', 'paper', 'scissors', 'lizard', 'spock']
+
+  def self.new_subclass(sub)
+    case sub
+    when 'rock' then Rock.new
+    when 'paper' then Paper.new
+    when 'scissors' then Scissors.new
+    when 'lizard' then Lizard.new
+    when 'spock' then Spock.new
+    end
+  end
 
   def self.or_list
     VALUES[0..-2].join(', ') + ', or ' + VALUES[-1]
@@ -68,36 +78,12 @@ class Move
     @value = move
   end
 
-  def scissors?
-    value == 'scissors'
+  def >(other_move)
+    self.beat?(other_move.value)
   end
 
-  def rock?
-    value == 'rock'
-  end
-
-  def paper?
-    value == 'paper'
-  end
-
-  def spock?
-    value == 'spock'
-  end
-
-  def lizard?
-    value == 'lizard'
-  end
-
-  def >(other)
-    scissors? && (other.paper? || other.lizard?) ||
-      paper? && (other.rock? || other.spock?) ||
-      rock? && (other.scissors? || other.lizard?) ||
-      lizard? && (other.spock? || other.paper?) ||
-      spock? && (other.rock? || other.scissors?)
-  end
-
-  def <(other)
-    other > self
+  def <(other_move)
+    other_move.beat?(self.value)
   end
 
   def to_s
@@ -105,11 +91,56 @@ class Move
   end
 end
 
-class Rule
+class Rock < Move
   def initialize
-    # unsure?
+    super('rock')
+  end
+
+  def beat?(type)
+    ['scissors', 'lizard'].include?(type)
   end
 end
+
+class Paper < Move
+  def initialize
+    super('paper')
+  end
+
+  def beat?(type)
+    ['rock', 'spock'].include?(type)
+  end
+end
+
+class Scissors < Move
+  def initialize
+    super('scissors')
+  end
+
+  def beat?(type)
+    ['paper', 'lizard'].include?(type)
+  end
+end
+
+class Lizard < Move
+  def initialize
+    super('lizard')
+  end
+
+  def beat?(type)
+    ['paper', 'spock'].include?(type)
+  end
+end
+
+class Spock < Move
+  def initialize
+    super('spock')
+  end
+
+  def beat?(type)
+    ['rock', 'scissors'].include?(type)
+  end
+end
+
 
 class RPSGame
   attr_accessor :human, :computer, :winner
@@ -188,46 +219,3 @@ class RPSGame
 end
 
 RPSGame.new.play
-
-
-=begin
-class Move
-  attr_reader :value
-
-  VALUES = ['rock', 'paper', 'scissors', 'lizard', 'spock']
-
-  def to_s
-    value
-  end
-end
-
-class Rock < Move
-  def initialize
-    @value = 'rock'
-  end
-end
-
-class Paper < Move
-  def initialize
-    @value = 'paper'
-  end
-end
-
-class Scissors < Move
-  def initialize
-    @value = 'scissors'
-  end
-end
-
-class Lizard < Move
-  def initialize
-    @value = 'lizard'
-  end
-end
-
-class Spock < Move
-  def initialize
-    @value = 'spock'
-  end
-end
-=end
