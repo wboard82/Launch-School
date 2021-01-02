@@ -1,5 +1,3 @@
-require 'pry'
-
 class Player
   attr_accessor :move, :name, :score, :history
 
@@ -22,10 +20,11 @@ class Player
   end
 
   def display_history
-    puts "#{self} played these moves:"
+    puts "#{self} ended up with #{score} points by playing these moves:"
     history.each_with_index do |move, index|
       puts "#{index + 1}. #{move}"
     end
+    puts
   end
 end
 
@@ -49,7 +48,7 @@ class Human < Player
       break if Move::VALUES.include? choice
       puts "Sorry, invalid choice."
     end
-    self.move = Move.new_subclass(choice)
+    self.move = MoveFactory.new_move(choice)
     record_move
   end
 end
@@ -60,7 +59,7 @@ class Computer < Player
   end
 
   def choose
-    self.move = Move.new_subclass(Move::VALUES.sample)
+    self.move = MoveFactory.new_move
     record_move
   end
 end
@@ -69,16 +68,6 @@ class Move
   attr_reader :value
 
   VALUES = ['rock', 'paper', 'scissors', 'lizard', 'spock']
-
-  def self.new_subclass(sub)
-    case sub
-    when 'rock' then Rock.new
-    when 'paper' then Paper.new
-    when 'scissors' then Scissors.new
-    when 'lizard' then Lizard.new
-    when 'spock' then Spock.new
-    end
-  end
 
   def self.or_list
     VALUES[0..-2].join(', ') + ', or ' + VALUES[-1]
@@ -155,6 +144,19 @@ class Spock < Move
   end
 end
 
+class MoveFactory
+  def self.new_move(move=nil)
+    move = Move::VALUES.sample if move.nil?
+
+    case move
+    when 'rock' then Rock.new
+    when 'paper' then Paper.new
+    when 'scissors' then Scissors.new
+    when 'lizard' then Lizard.new
+    when 'spock' then Spock.new
+    end
+  end
+end
 
 class RPSGame
   attr_accessor :human, :computer, :winner, :history
@@ -176,11 +178,16 @@ class RPSGame
 
     answer == 'y'
   end
+  
+  def clear
+    system('cls') || system('clear')
+  end
 
   def play
     display_welcome_message
 
     loop do
+      clear
       human.choose
       computer.choose
       display_moves
@@ -190,6 +197,7 @@ class RPSGame
       break unless play_again?
     end
 
+    clear
     human.display_history
     computer.display_history
 
@@ -197,8 +205,12 @@ class RPSGame
   end
 
   def display_welcome_message
+    clear
     puts "Welcome, #{human}."
+    sleep 0.75
     puts "Get ready to play #{Move.cap_list}!"
+    sleep 1.5
+    clear
   end
   
   def update_score
@@ -216,17 +228,24 @@ class RPSGame
   def display_score
     puts "#{human} has #{human.score} points."
     puts "#{computer} has #{computer.score} points."
+    puts
   end
 
   def display_moves
+    clear
     puts "#{human} chose #{human.move}."
     puts "#{computer} chose #{computer.move}."
+    puts
   end
 
   def display_winner
-    if winner then puts "#{winner} won!"
-    else puts "It's a tie!"
+    if winner
+      puts "#{winner} won!"
+    else
+      puts "It's a tie!"
     end
+
+    puts
   end
 
   def display_goodbye_message
