@@ -45,28 +45,38 @@ class Computer < Player
 end
 
 class Move
-  attr_reader :move
-
-  include Comparable
+  attr_reader :value
 
   VALUES = ['rock', 'paper', 'scissors']
 
-  MOVE_RESULTS = {
-    'rock' => { 'rock' => 0, 'scissors' => 1, 'paper' => -1 },
-    'paper' => { 'rock' => 1, 'scissors' => -1, 'paper' => 0 },
-    'scissors' => { 'rock' => -1, 'scissors' => 0, 'paper' => 1 }
-  }
-
   def initialize(move)
-    @move = move
+    @value = move
   end
 
-  def <=>(other)
-    MOVE_RESULTS[move][other.move]
+  def scissors?
+    value == 'scissors'
+  end
+
+  def rock?
+    value == 'rock'
+  end
+
+  def paper?
+    value == 'paper'
+  end
+
+  def >(other)
+    (scissors? && other.paper?) || (paper? && other.rock?) ||
+      (rock? && other.scissors?)
+  end
+
+  def <(other)
+    (scissors? && other.rock?) || (paper? && other.scissors?) ||
+      (rock? && other.paper?)
   end
 
   def to_s
-    move
+    value
   end
 end
 
@@ -85,7 +95,7 @@ class RPSGame
 
   def initialize
     @human = Human.new
-    @computer = Computer.new(:computer)
+    @computer = Computer.new
   end
 
   def play_again?
@@ -107,6 +117,7 @@ class RPSGame
     loop do
       human.choose
       computer.choose
+      display_moves
       display_winner
       break unless play_again?
     end
@@ -118,13 +129,15 @@ class RPSGame
     puts "Welcome, #{human}. Get ready to play Rock, Paper, Scissors!"
   end
 
-  def display_winner
+  def display_moves
     puts "#{human} chose #{human.move}."
     puts "#{computer} chose #{computer.move}."
-    case human.move <=> computer.move
-    when 1 then puts "#{human} won!"
-    when -1 then puts "#{computer} won!"
-    when 0 then puts "It's a tie!"
+  end
+
+  def display_winner
+    if human.move > computer.move then puts "#{human} won!"
+    elsif human.move < computer.move then puts "#{computer} won!"
+    else puts "It's a tie!"
     end
   end
 
