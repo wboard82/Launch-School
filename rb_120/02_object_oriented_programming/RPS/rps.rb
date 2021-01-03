@@ -5,7 +5,7 @@ class Player
     @score = 0
     @history = []
     set_name
-    @move_factory = MoveFactory.new
+    @move_generator = MoveGenerator.new
   end
 
   def to_s
@@ -51,6 +51,11 @@ class Player
     end
     puts
   end
+
+  def choose
+    self.move = @move_generator.new_move
+    record_move
+  end
 end
 
 class Human < Player
@@ -73,7 +78,7 @@ class Human < Player
       break if Move::VALUES.include? choice
       puts "Sorry, invalid choice."
     end
-    self.move = @move_factory.new_move(choice)
+    self.move = @move_generator.new_move(choice)
     record_move
   end
 end
@@ -81,11 +86,6 @@ end
 class Computer < Player
   def set_name
     self.name = ['R2D2', 'Hal', 'Chappie', 'Sonny', 'Number 5'].sample
-  end
-
-  def choose
-    self.move = @move_factory.new_move
-    record_move
   end
 end
 
@@ -95,46 +95,46 @@ class Chappie < Player
   end
 
   def choose
-    if won? || tied?
-      self.move = @move_factory.new_move(move.value)
-    else
-      self.move = @move_factory.new_move
-    end
-
+    repeat_move = (won? || tied?)
+    self.move = @move_generator.new_move(repeat: repeat_move)
     record_move
   end
 end
 
 class R2D2 < Player
-  def set_name
-    self.name = 'R2D2'
+  def initialize
+    super
+    @move_generator.weight_move('paper', 0)
+    @move_generator.weight_move('scissors', 0)
+    @move_generator.weight_move('lizard', 0)
+    @move_generator.weight_move('spock', 0)
   end
 
-  def choose
-    self.move = Rock.new
-    record_move
+  def set_name
+    self.name = 'R2D2'
   end
 end
 
 class Hal < Player
   def initialize
     super
-    @move_count = 0
+    @move_generator.set_repeat(3) 
   end
 
   def set_name
     self.name = 'Hal'
   end
+end
 
-  def choose
-    if @move_count % 3 == 0
-      self.move = @move_factory.new_move
-    else
-      self.move = @move_factory.new_move(move.value)
-    end
-
-    @move_count += 1
-    record_move
+class Sonny < Player
+  def initialize
+    super
+    @move_generator.weight_move('lizard', 0)
+    @move_generator.weight_move('spock', 0)
+  end
+  
+  def set_name
+    self.name = 'Sonny'
   end
 end
 
@@ -218,11 +218,12 @@ class Spock < Move
   end
 end
 
-class MoveFactory
+class MoveGenerator
   def initialize
     @moves = Move::VALUES.clone
     @new_move_every = 1
     @last_move = nil
+    @move_count = 0
   end
 
   def weight_move(move, weight)
@@ -230,9 +231,14 @@ class MoveFactory
     @moves.concat([move] * weight)
   end
 
-  def new_move(move=nil)
+  def new_move(move=nil, repeat: false)
+    if repeat || repeat_last_move?
+      move = @last_move
+    end
+
     move ||= @moves.sample
     @last_move = move
+    @move_count += 1
 
     case move
     when 'rock' then Rock.new
@@ -243,12 +249,12 @@ class MoveFactory
     end
   end
 
-  def last_move
-    @last_move || new_move
+  def set_repeat(times)
+    @new_move_every = times
   end
 
-  def set_repeat_moves(times)
-    @new_move_every = times
+  def repeat_last_move?
+    @move_count % @new_move_every != 0
   end
 end
 
@@ -312,10 +318,11 @@ class RPSGame
     puts "1. R2D2 (very consistent)"
     puts "2. Hal (gets into a rhythm)"
     puts "3. Chappie (sticks with a winner)"
+    puts "4. Sonny (only trusts inanimate objects)"
     choice = nil
     loop do
       choice = gets.chomp
-      break if ['1', '2', '3'].include?(choice)
+      break if ['1', '2', '3', '4'].include?(choice)
       puts "Sorry, invalid entry. Please try again."
     end
 
@@ -323,6 +330,7 @@ class RPSGame
     when '1' then R2D2.new
     when '2' then Hal.new
     when '3' then Chappie.new
+    when '4' then Sonny.new
     end
   end
   
