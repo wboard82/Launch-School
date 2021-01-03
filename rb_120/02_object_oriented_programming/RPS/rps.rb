@@ -5,6 +5,7 @@ class Player
     @score = 0
     @history = []
     set_name
+    @move_factory = MoveFactory.new
   end
 
   def to_s
@@ -72,7 +73,7 @@ class Human < Player
       break if Move::VALUES.include? choice
       puts "Sorry, invalid choice."
     end
-    self.move = MoveFactory.new_move(choice)
+    self.move = @move_factory.new_move(choice)
     record_move
   end
 end
@@ -83,7 +84,7 @@ class Computer < Player
   end
 
   def choose
-    self.move = MoveFactory.new_move
+    self.move = @move_factory.new_move
     record_move
   end
 end
@@ -95,9 +96,9 @@ class Chappie < Player
 
   def choose
     if won? || tied?
-      self.move = MoveFactory.new_move(move.value)
+      self.move = @move_factory.new_move(move.value)
     else
-      self.move = MoveFactory.new_move
+      self.move = @move_factory.new_move
     end
 
     record_move
@@ -127,9 +128,9 @@ class Hal < Player
 
   def choose
     if @move_count % 3 == 0
-      self.move = MoveFactory.new_move
+      self.move = @move_factory.new_move
     else
-      self.move = MoveFactory.new_move(move.value)
+      self.move = @move_factory.new_move(move.value)
     end
 
     @move_count += 1
@@ -218,8 +219,20 @@ class Spock < Move
 end
 
 class MoveFactory
-  def self.new_move(move=nil)
-    move = Move::VALUES.sample if move.nil?
+  def initialize
+    @moves = Move::VALUES.clone
+    @new_move_every = 1
+    @last_move = nil
+  end
+
+  def weight_move(move, weight)
+    @moves.delete(move)
+    @moves.concat([move] * weight)
+  end
+
+  def new_move(move=nil)
+    move ||= @moves.sample
+    @last_move = move
 
     case move
     when 'rock' then Rock.new
@@ -228,6 +241,14 @@ class MoveFactory
     when 'lizard' then Lizard.new
     when 'spock' then Spock.new
     end
+  end
+
+  def last_move
+    @last_move || new_move
+  end
+
+  def set_repeat_moves(times)
+    @new_move_every = times
   end
 end
 
