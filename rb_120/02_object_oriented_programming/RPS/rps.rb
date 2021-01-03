@@ -18,6 +18,30 @@ class Player
   def record_move
     history << move.value
   end
+  
+  def won
+    @last_result = :won
+  end
+
+  def lost
+    @last_result = :lost
+  end
+
+  def tied
+    @last_result = :tied
+  end
+
+  def won?
+    @last_result == :won
+  end
+
+  def lost?
+    @last_result == :lost
+  end
+
+  def tied?
+    @last_result == :tied
+  end
 
   def display_history
     puts "#{self} ended up with #{score} points by playing these moves:"
@@ -60,6 +84,55 @@ class Computer < Player
 
   def choose
     self.move = MoveFactory.new_move
+    record_move
+  end
+end
+
+class Chappie < Player
+  def set_name
+    self.name = 'Chappie'
+  end
+
+  def choose
+    if won? || tied?
+      self.move = MoveFactory.new_move(move.value)
+    else
+      self.move = MoveFactory.new_move
+    end
+
+    record_move
+  end
+end
+
+class R2D2 < Player
+  def set_name
+    self.name = 'R2D2'
+  end
+
+  def choose
+    self.move = Rock.new
+    record_move
+  end
+end
+
+class Hal < Player
+  def initialize
+    super
+    @move_count = 0
+  end
+
+  def set_name
+    self.name = 'Hal'
+  end
+
+  def choose
+    if @move_count % 3 == 0
+      self.move = MoveFactory.new_move
+    else
+      self.move = MoveFactory.new_move(move.value)
+    end
+
+    @move_count += 1
     record_move
   end
 end
@@ -163,7 +236,7 @@ class RPSGame
 
   def initialize
     @human = Human.new
-    @computer = Computer.new
+    @computer = select_computer
   end
 
   def play_again?
@@ -212,18 +285,55 @@ class RPSGame
     sleep 1.5
     clear
   end
+
+  def select_computer
+    puts "Which computer would you like to play against?"
+    puts "1. R2D2 (very consistent)"
+    puts "2. Hal (gets into a rhythm)"
+    puts "3. Chappie (sticks with a winner)"
+    choice = nil
+    loop do
+      choice = gets.chomp
+      break if ['1', '2', '3'].include?(choice)
+      puts "Sorry, invalid entry. Please try again."
+    end
+
+    case choice
+    when '1' then R2D2.new
+    when '2' then Hal.new
+    when '3' then Chappie.new
+    end
+  end
   
   def update_score
     if human.move > computer.move
       human.increment_score
-      self.winner = human
+      update_winner('human')
     elsif human.move < computer.move
       computer.increment_score
-      self.winner = computer
+      update_winner('computer')
     else
-      self.winner = nil
+      update_winner('tied')
     end
   end
+
+  def update_winner(winner_name)
+    case winner_name
+    when 'human'
+      self.winner = human
+      human.won
+      computer.lost
+    when 'computer'
+      self.winner = computer
+      human.lost
+      computer.won
+    when 'tied'
+      self.winner = nil
+      human.tied
+      computer.tied
+    end
+  end
+
 
   def display_score
     puts "#{human} has #{human.score} points."
