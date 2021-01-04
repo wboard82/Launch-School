@@ -138,6 +138,21 @@ class Sonny < Player
   end
 end
 
+class Number5 < Player
+  def initialize
+    super
+    @move_generator.weight_move('rock', 1)
+    @move_generator.weight_move('paper', 2)
+    @move_generator.weight_move('scissors', 3)
+    @move_generator.weight_move('lizard', 4)
+    @move_generator.weight_move('spock', 5)
+  end
+
+  def set_name
+    self.name = 'Number 5'
+  end
+end
+
 class Move
   attr_reader :value
 
@@ -319,10 +334,11 @@ class RPSGame
     puts "2. Hal (gets into a rhythm)"
     puts "3. Chappie (sticks with a winner)"
     puts "4. Sonny (only trusts inanimate objects)"
+    puts "5. Number 5 (has its own preferences)"
     choice = nil
     loop do
       choice = gets.chomp
-      break if ['1', '2', '3', '4'].include?(choice)
+      break if ['1', '2', '3', '4', '5'].include?(choice)
       puts "Sorry, invalid entry. Please try again."
     end
 
@@ -331,6 +347,7 @@ class RPSGame
     when '2' then Hal.new
     when '3' then Chappie.new
     when '4' then Sonny.new
+    when '5' then Number5.new
     end
   end
   
