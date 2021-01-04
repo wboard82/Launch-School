@@ -1,11 +1,20 @@
+# TODO:
+#  - Input validation on name
+#  - Clear screen before name
+#  - Order of welcome/name messages
+#  - Test and try to break y/n validation
+#  - Add yes/no to validation
+#  - Abbreviations for moves
+#  - Tournament?
+
 class Player
-  attr_accessor :move, :name, :score, :history
+  attr_reader :move, :score
 
   def initialize
     @score = 0
     @history = []
-    set_name
     @move_generator = MoveGenerator.new
+    set_name
   end
 
   def to_s
@@ -45,7 +54,7 @@ class Player
   end
 
   def display_history
-    puts "#{self} ended up with #{score} points by playing these moves:"
+    puts "#{self} finished with #{score} points by playing these moves:"
     history.each_with_index do |move, index|
       puts "#{index + 1}. #{move}"
     end
@@ -56,6 +65,11 @@ class Player
     self.move = @move_generator.new_move
     record_move
   end
+
+  private
+
+  attr_writer :move, :score
+  attr_accessor :name, :history
 end
 
 class Human < Player
@@ -80,12 +94,6 @@ class Human < Player
     end
     self.move = @move_generator.new_move(choice)
     record_move
-  end
-end
-
-class Computer < Player
-  def set_name
-    self.name = ['R2D2', 'Hal', 'Chappie', 'Sonny', 'Number 5'].sample
   end
 end
 
