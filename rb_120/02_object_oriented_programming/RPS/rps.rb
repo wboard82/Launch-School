@@ -1,3 +1,4 @@
+require 'pry'
 # TODO:
 #  - Input validation on name
 #  - Clear screen before name
@@ -74,27 +75,33 @@ end
 
 class Human < Player
   def set_name
-    n = nil
+    input = nil
+    puts "What's your name?"
     loop do
-      puts "What's your name?"
-      n = gets.chomp
-      break unless n.empty?
+      print "=> "
+      input = gets.chomp
+      break unless input.empty?
       puts "Sorry, must enter a value."
     end
-    self.name = n
+    self.name = input
   end
 
   def choose
     choice = nil
+    puts "Please choose a move:"
+    puts MoveGenerator::MOVE_MENU
+
     loop do
-      puts "Please choose #{Move.or_list}:"
+      print "=> "
       choice = gets.chomp
-      break if Move::VALUES.include? choice
-      puts "Sorry, invalid choice."
+      break if MoveGenerator.valid_input?(choice)
+      puts "Sorry, invalid choice. Please try again."
     end
+
     self.move = @move_generator.new_move(choice)
     record_move
   end
+
 end
 
 class Chappie < Player
@@ -103,8 +110,8 @@ class Chappie < Player
   end
 
   def choose
-    repeat_move = (won? || tied?)
-    self.move = @move_generator.new_move(repeat: repeat_move)
+    @move_generator.repeat = (won? || tied?)
+    self.move = @move_generator.new_move
     record_move
   end
 end
@@ -164,8 +171,6 @@ end
 class Move
   attr_reader :value
 
-  VALUES = ['rock', 'paper', 'scissors', 'lizard', 'spock']
-
   def initialize(move)
     @value = move
   end
@@ -176,14 +181,6 @@ class Move
 
   def <(other_move)
     other_move.beat?(self.value)
-  end
-
-  def self.or_list
-    VALUES[0..-2].join(', ') + ', or ' + VALUES[-1]
-  end
-
-  def self.cap_list
-    VALUES.map(&:capitalize).join(', ')
   end
 
   def to_s
@@ -242,24 +239,49 @@ class Spock < Move
 end
 
 class MoveGenerator
+  MOVES = {
+    'r' => 'rock',
+    'p' => 'paper',
+    's' => 'scissors',
+    'l' => 'lizard',
+    'k' => 'spock'
+  }
+
+  MOVE_MENU = MOVES.map {|abbrev, move| "#{abbrev} = #{move}"}.join("\n")
+  VALID_INPUTS = MOVES.flatten
+  VALUES = MOVES.values
+  ABBREVS = MOVES.keys
+
+  attr_writer :repeat
+
+  def self.valid_input?(choice)
+    choice = choice.downcase
+    VALID_INPUTS.include?(choice)
+  end
+
   def initialize
-    @moves = Move::VALUES.clone
+    @weighted_moves = VALUES.clone
     @new_move_every = 1
     @last_move = nil
     @move_count = 0
   end
 
   def weight_move(move, weight)
-    @moves.delete(move)
-    @moves.concat([move] * weight)
+    @weighted_moves.delete(move)
+    @weighted_moves.concat([move] * weight)
   end
 
-  def new_move(move=nil, repeat: false)
-    if repeat || repeat_last_move?
+  def new_move(input=nil)
+    if repeat_last_move?
       move = @last_move
+    elsif input.nil?
+      move = @weighted_moves.sample
+    elsif input.size == 1
+      move = MOVES[input] 
+    else
+      move = input
     end
 
-    move ||= @moves.sample
     @last_move = move
     @move_count += 1
 
@@ -279,20 +301,18 @@ class MoveGenerator
   private
 
   def repeat_last_move?
-    @move_count % @new_move_every != 0
+    (@move_count % @new_move_every != 0) || @repeat
   end
 end
 
 class RPSGame
-  attr_accessor :human, :computer, :winner, :history
+  NAME_OF_GAME = MoveGenerator::VALUES.map(&:capitalize).join(', ')
 
   def initialize
-    @human = Human.new
-    @computer = select_computer
   end
 
   def play
-    display_welcome_message
+    set_up_game
 
     loop do
       clear
@@ -314,6 +334,8 @@ class RPSGame
 
   private
 
+  attr_accessor :human, :computer, :winner, :history
+
   def clear
     system('cls') || system('clear')
   end
@@ -332,23 +354,29 @@ class RPSGame
   end
   
   def display_welcome_message
+    puts "Welcome to #{NAME_OF_GAME}." 
+  end
+
+  def set_up_game
     clear
-    puts "Welcome, #{human}."
-    sleep 0.75
-    puts "Get ready to play #{Move.cap_list}!"
-    sleep 1.5
+    display_welcome_message
+    @human = Human.new
     clear
+    @computer = select_computer
+    puts "Okay, let's play!"
+    sleep 1
   end
 
   def select_computer
-    puts "Which computer would you like to play against?"
-    puts "1. R2D2 (very consistent)"
-    puts "2. Hal (gets into a rhythm)"
-    puts "3. Chappie (sticks with a winner)"
-    puts "4. Sonny (only trusts inanimate objects)"
-    puts "5. Number 5 (has its own preferences)"
+    puts "Which computer would you like to play against, #{human}?"
+    puts " 1. R2D2 (very consistent)"
+    puts " 2. Hal (gets into a rhythm)"
+    puts " 3. Chappie (sticks with a winner)"
+    puts " 4. Sonny (only trusts inanimate objects)"
+    puts " 5. Number 5 (has its own preferences)"
     choice = nil
     loop do
+      print "=> "
       choice = gets.chomp
       break if ['1', '2', '3', '4', '5'].include?(choice)
       puts "Sorry, invalid entry. Please try again."
@@ -416,7 +444,7 @@ class RPSGame
   end
 
   def display_goodbye_message
-    puts "Thank you for playing #{Move.cap_list}."
+    puts "Thanks for playing #{NAME_OF_GAME}"
     puts "Goodbye, #{human}!"
   end
 end
