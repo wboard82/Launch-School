@@ -166,14 +166,6 @@ class Move
 
   VALUES = ['rock', 'paper', 'scissors', 'lizard', 'spock']
 
-  def self.or_list
-    VALUES[0..-2].join(', ') + ', or ' + VALUES[-1]
-  end
-
-  def self.cap_list
-    VALUES.map(&:capitalize).join(', ')
-  end
-
   def initialize(move)
     @value = move
   end
@@ -186,8 +178,16 @@ class Move
     other_move.beat?(self.value)
   end
 
+  def self.or_list
+    VALUES[0..-2].join(', ') + ', or ' + VALUES[-1]
+  end
+
+  def self.cap_list
+    VALUES.map(&:capitalize).join(', ')
+  end
+
   def to_s
-    value
+    value.clone
   end
 end
 
@@ -276,6 +276,8 @@ class MoveGenerator
     @new_move_every = times
   end
 
+  private
+
   def repeat_last_move?
     @move_count % @new_move_every != 0
   end
@@ -287,23 +289,6 @@ class RPSGame
   def initialize
     @human = Human.new
     @computer = select_computer
-  end
-
-  def play_again?
-    answer = nil
-
-    loop do
-      puts "Would you like to play again? (y/n)"
-      answer = gets.chomp
-      break if ['y', 'n'].include? answer.downcase
-      puts "Sorry, must be y or n."
-    end
-
-    answer == 'y'
-  end
-  
-  def clear
-    system('cls') || system('clear')
   end
 
   def play
@@ -327,6 +312,25 @@ class RPSGame
     display_goodbye_message
   end
 
+  private
+
+  def clear
+    system('cls') || system('clear')
+  end
+
+  def play_again?
+    answer = nil
+
+    loop do
+      puts "Would you like to play again? (y/n)"
+      answer = gets.chomp
+      break if ['y', 'n'].include? answer.downcase
+      puts "Sorry, must be y or n."
+    end
+
+    answer == 'y'
+  end
+  
   def display_welcome_message
     clear
     puts "Welcome, #{human}."
@@ -387,7 +391,6 @@ class RPSGame
       computer.tied
     end
   end
-
 
   def display_score
     puts "#{human} has #{human.score} points."
