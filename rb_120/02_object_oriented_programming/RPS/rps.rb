@@ -67,6 +67,10 @@ class Player
     record_move
   end
 
+  def reset_score
+    self.score = 0
+  end
+
   private
 
   attr_writer :move, :score
@@ -308,26 +312,27 @@ end
 class RPSGame
   NAME_OF_GAME = MoveGenerator::VALUES.map(&:capitalize).join(', ')
 
-  def initialize
-  end
-
   def play
-    set_up_game
+    display_welcome_message
+    set_up_human
 
     loop do
-      clear
-      human.choose
-      computer.choose
-      display_moves
-      update_score
-      display_winner
-      display_score
-      break unless play_again?
-    end
+      select_computer
+      input_best_of
+      display_pregame_message
 
-    clear
-    human.display_history
-    computer.display_history
+      @grand_winner = nil
+      loop do
+        play_round
+        break if best_of_winner?
+      end
+
+      display_best_of_winner
+      display_history if display_history?
+
+      break unless play_again?
+      human.reset_score
+    end
 
     display_goodbye_message
   end
@@ -340,57 +345,122 @@ class RPSGame
     system('cls') || system('clear')
   end
 
-  def play_again?
+  def yes_or_no
     answer = nil
-
     loop do
-      puts "Would you like to play again? (y/n)"
       answer = gets.chomp
-      break if ['y', 'n'].include? answer.downcase
+      break if ['y', 'n', 'yes', 'no'].include? answer.downcase
       puts "Sorry, must be y or n."
     end
-
-    answer == 'y'
+    answer[0] == 'y'
   end
-  
+
   def display_welcome_message
+    clear
     puts "Welcome to #{NAME_OF_GAME}." 
+    puts
   end
 
-  def set_up_game
-    clear
-    display_welcome_message
+  def set_up_human
     @human = Human.new
-    clear
-    @computer = select_computer
-    puts "Okay, let's play!"
-    sleep 1
+  end
+
+  def display_rules
+    puts "#{NAME_OF_GAME} is a two-player game, you vs. the computer."
+    puts "You will each choose a move and then that round is judged."
+    puts "Each move can beat two other moves, lose to two other moves, or tie with the same move."
+    puts "You can play a single game tournament or one that is best of up to 9 games."
   end
 
   def select_computer
+    clear
     puts "Which computer would you like to play against, #{human}?"
-    puts " 1. R2D2 (very consistent)"
-    puts " 2. Hal (gets into a rhythm)"
-    puts " 3. Chappie (sticks with a winner)"
-    puts " 4. Sonny (only trusts inanimate objects)"
-    puts " 5. Number 5 (has its own preferences)"
+    puts " 1. R2D2 - (very consistent)"
+    puts " 2. Hal - (gets into a rhythm)"
+    puts " 3. Chappie - (sticks with a winner)"
+    puts " 4. Sonny - (only trusts inanimate objects)"
+    puts " 5. Number 5 - (has its own preferences)"
     choice = nil
     loop do
       print "=> "
       choice = gets.chomp
       break if ['1', '2', '3', '4', '5'].include?(choice)
-      puts "Sorry, invalid entry. Please try again."
+      puts "Sorry, invalid entry. Please enter a number 1-5."
     end
 
-    case choice
-    when '1' then R2D2.new
-    when '2' then Hal.new
-    when '3' then Chappie.new
-    when '4' then Sonny.new
-    when '5' then Number5.new
+    @computer = case choice
+                when '1' then R2D2.new
+                when '2' then Hal.new
+                when '3' then Chappie.new
+                when '4' then Sonny.new
+                when '5' then Number5.new
+                end
+  end
+
+  def input_best_of
+    clear
+    puts "Would you like to play best of 1, 3, 5, 7, or 9?"
+    input = nil
+    loop do
+      print "=> "
+      input = gets.chomp
+      break if ['1', '3', '5', '7', '9'].include?(input)
+      puts "Please enter 1, 3, 5, 7, or 9."
     end
+
+    @best_of = input.to_i
+  end
+
+  def display_pregame_message
+    clear
+    puts "Okay, #{human} vs. #{computer}."
+    puts "Best of #{@best_of}."
+    puts "Let's go!"
+    sleep 2
+    clear
   end
   
+  def play_round
+    human.choose
+    computer.choose
+    display_moves
+    update_score
+    display_winner
+    display_score
+  end
+  
+  def best_of_winner?
+    goal = @best_of / 2 + 1
+    human.score >= goal || computer.score >= goal
+  end
+
+  def display_best_of_winner
+    sleep 0.75
+    if winner == human
+      puts "*** Congratulations! You have won the best of #{@best_of} game! ***"
+    else
+      puts "*** #{computer} has won the best of #{@best_of} game! ***"
+    end
+  end
+
+  def display_history?
+    sleep 0.75
+    puts
+    puts "Would you like to see the moves each player played? (y/n)"
+    yes_or_no
+  end
+
+  def display_history
+    clear
+    human.display_history
+    computer.display_history
+  end
+
+  def play_again?
+    puts "Would you like to play again? (y/n)"
+    yes_or_no
+  end
+
   def update_score
     if human.move > computer.move
       human.increment_score
@@ -434,16 +504,17 @@ class RPSGame
   end
 
   def display_winner
+    sleep 0.75
     if winner
       puts "#{winner} won!"
     else
       puts "It's a tie!"
     end
-
     puts
   end
 
   def display_goodbye_message
+    clear
     puts "Thanks for playing #{NAME_OF_GAME}"
     puts "Goodbye, #{human}!"
   end
