@@ -1,13 +1,3 @@
-require 'pry'
-# TODO:
-#  - Input validation on name
-#  - Clear screen before name
-#  - Order of welcome/name messages
-#  - Test and try to break y/n validation
-#  - Add yes/no to validation
-#  - Abbreviations for moves
-#  - Tournament?
-
 class Player
   attr_reader :move, :score
 
@@ -29,7 +19,7 @@ class Player
   def record_move
     history << move.value
   end
-  
+
   def won
     @last_result = :won
   end
@@ -67,8 +57,9 @@ class Player
     record_move
   end
 
-  def reset_score
+  def reset
     self.score = 0
+    self.history = []
   end
 
   private
@@ -92,9 +83,7 @@ class Human < Player
 
   def choose
     choice = nil
-    puts "Please choose a move:"
-    puts MoveGenerator::MOVE_MENU
-
+    display_move_menu
     loop do
       print "=> "
       choice = gets.chomp
@@ -106,6 +95,10 @@ class Human < Player
     record_move
   end
 
+  def display_move_menu
+    puts "Please choose a move:"
+    puts MoveGenerator::MOVE_MENU
+  end
 end
 
 class Chappie < Player
@@ -137,7 +130,7 @@ end
 class Hal < Player
   def initialize
     super
-    @move_generator.set_repeat(3) 
+    @move_generator.new_move_every = 3
   end
 
   def set_name
@@ -151,7 +144,7 @@ class Sonny < Player
     @move_generator.weight_move('lizard', 0)
     @move_generator.weight_move('spock', 0)
   end
-  
+
   def set_name
     self.name = 'Sonny'
   end
@@ -180,11 +173,11 @@ class Move
   end
 
   def >(other_move)
-    self.beat?(other_move.value)
+    beat?(other_move.value)
   end
 
   def <(other_move)
-    other_move.beat?(self.value)
+    other_move.beat?(value)
   end
 
   def to_s
@@ -251,12 +244,12 @@ class MoveGenerator
     'k' => 'spock'
   }
 
-  MOVE_MENU = MOVES.map {|abbrev, move| "#{abbrev} = #{move}"}.join("\n")
+  MOVE_MENU = MOVES.map { |abbrev, move| "#{abbrev} = #{move}" }.join("\n")
   VALID_INPUTS = MOVES.flatten
   VALUES = MOVES.values
   ABBREVS = MOVES.keys
 
-  attr_writer :repeat
+  attr_writer :repeat, :new_move_every
 
   def self.valid_input?(choice)
     choice = choice.downcase
@@ -276,19 +269,20 @@ class MoveGenerator
   end
 
   def new_move(input=nil)
-    if repeat_last_move?
-      move = @last_move
-    elsif input.nil?
-      move = @weighted_moves.sample
-    elsif input.size == 1
-      move = MOVES[input] 
-    else
-      move = input
-    end
+    move = if repeat_last_move? then @last_move
+           elsif input.nil? then @weighted_moves.sample
+           elsif input.size == 1 then MOVES[input]
+           else input
+           end
 
     @last_move = move
     @move_count += 1
+    create_move(move)
+  end
 
+  private
+
+  def create_move(move)
     case move
     when 'rock' then Rock.new
     when 'paper' then Paper.new
@@ -297,12 +291,6 @@ class MoveGenerator
     when 'spock' then Spock.new
     end
   end
-
-  def set_repeat(times)
-    @new_move_every = times
-  end
-
-  private
 
   def repeat_last_move?
     (@move_count % @new_move_every != 0) || @repeat
@@ -313,27 +301,15 @@ class RPSGame
   NAME_OF_GAME = MoveGenerator::VALUES.map(&:capitalize).join(', ')
 
   def play
-    display_welcome_message
-    set_up_human
+    set_up_game
 
     loop do
-      select_computer
-      input_best_of
-      display_pregame_message
-
-      @grand_winner = nil
-      loop do
-        play_round
-        break if best_of_winner?
-      end
-
-      display_best_of_winner
-      display_history if display_history?
-
+      set_up_tournament
+      play_tournament
+      end_tournament
+      human.reset
       break unless play_again?
-      human.reset_score
     end
-
     display_goodbye_message
   end
 
@@ -357,7 +333,7 @@ class RPSGame
 
   def display_welcome_message
     clear
-    puts "Welcome to #{NAME_OF_GAME}." 
+    puts "Welcome to #{NAME_OF_GAME}."
     puts
   end
 
@@ -368,18 +344,32 @@ class RPSGame
   def display_rules
     puts "#{NAME_OF_GAME} is a two-player game, you vs. the computer."
     puts "You will each choose a move and then that round is judged."
-    puts "Each move can beat two other moves, lose to two other moves, or tie with the same move."
-    puts "You can play a single game tournament or one that is best of up to 9 games."
+    puts "Each move beats two other moves, loses to two other moves,\
+and ties with itself."
+    puts "You can play a single game tournament or best of up to 9 games."
+    puts
+  end
+
+  def set_up_game
+    display_welcome_message
+    display_rules
+    set_up_human
+  end
+
+  def set_up_tournament
+    select_computer
+    input_tournament_length
+    display_pregame_message
+    @grand_winner = nil
+  end
+
+  def end_tournament
+    display_tournament_winner
+    display_history if display_history?
   end
 
   def select_computer
-    clear
-    puts "Which computer would you like to play against, #{human}?"
-    puts " 1. R2D2 - (very consistent)"
-    puts " 2. Hal - (gets into a rhythm)"
-    puts " 3. Chappie - (sticks with a winner)"
-    puts " 4. Sonny - (only trusts inanimate objects)"
-    puts " 5. Number 5 - (has its own preferences)"
+    display_computer_choices
     choice = nil
     loop do
       print "=> "
@@ -388,16 +378,30 @@ class RPSGame
       puts "Sorry, invalid entry. Please enter a number 1-5."
     end
 
-    @computer = case choice
-                when '1' then R2D2.new
-                when '2' then Hal.new
-                when '3' then Chappie.new
-                when '4' then Sonny.new
-                when '5' then Number5.new
-                end
+    @computer = new_computer(choice)
   end
 
-  def input_best_of
+  def display_computer_choices
+    clear
+    puts "Which computer would you like to play against, #{human}?"
+    puts " 1. R2D2 - (very consistent)"
+    puts " 2. Hal - (gets into a rhythm)"
+    puts " 3. Chappie - (sticks with a winner)"
+    puts " 4. Sonny - (only trusts inanimate objects)"
+    puts " 5. Number 5 - (has its own preferences)"
+  end
+
+  def new_computer(choice)
+    case choice
+    when '1' then R2D2.new
+    when '2' then Hal.new
+    when '3' then Chappie.new
+    when '4' then Sonny.new
+    when '5' then Number5.new
+    end
+  end
+
+  def input_tournament_length
     clear
     puts "Would you like to play best of 1, 3, 5, 7, or 9?"
     input = nil
@@ -419,7 +423,7 @@ class RPSGame
     sleep 2
     clear
   end
-  
+
   def play_round
     human.choose
     computer.choose
@@ -428,18 +432,25 @@ class RPSGame
     display_winner
     display_score
   end
-  
-  def best_of_winner?
+
+  def tournament_winner?
     goal = @best_of / 2 + 1
     human.score >= goal || computer.score >= goal
   end
 
-  def display_best_of_winner
+  def play_tournament
+    loop do
+      play_round
+      return if tournament_winner?
+    end
+  end
+
+  def display_tournament_winner
     sleep 0.75
     if winner == human
-      puts "*** Congratulations! You have won the best of #{@best_of} game! ***"
+      puts "*** Congratulations! You won the tournament! ***"
     else
-      puts "*** #{computer} has won the best of #{@best_of} game! ***"
+      puts "*** #{computer} has won the tournament! ***"
     end
   end
 
@@ -475,25 +486,35 @@ class RPSGame
 
   def update_winner(winner_name)
     case winner_name
-    when 'human'
-      self.winner = human
-      human.won
-      computer.lost
-    when 'computer'
-      self.winner = computer
-      human.lost
-      computer.won
-    when 'tied'
-      self.winner = nil
-      human.tied
-      computer.tied
+    when 'human' then human_won
+    when 'computer' then computer_won
+    when 'tied' then tie
     end
+  end
+
+  def human_won
+    self.winner = human
+    human.won
+    computer.lost
+  end
+
+  def computer_won
+    self.winner = computer
+    human.lost
+    computer.won
+  end
+
+  def tie
+    self.winner = nil
+    human.tied
+    computer.tied
   end
 
   def display_score
     puts "#{human} has #{human.score} points."
     puts "#{computer} has #{computer.score} points."
     puts
+    sleep 0.75
   end
 
   def display_moves
