@@ -5,7 +5,6 @@ class Player
     @score = 0
     @history = []
     @move_generator = MoveGenerator.new
-    set_name
   end
 
   def to_s
@@ -52,8 +51,8 @@ class Player
     puts
   end
 
-  def choose
-    self.move = @move_generator.new_move
+  def choose(choice = nil)
+    self.move = move_generator.new_move(choice)
     record_move
   end
 
@@ -65,10 +64,16 @@ class Player
   private
 
   attr_writer :move, :score
+  attr_reader :move_generator
   attr_accessor :name, :history
 end
 
 class Human < Player
+  def initialize
+    super
+    set_name
+  end
+
   def set_name
     input = nil
     puts "What's your name?"
@@ -91,8 +96,7 @@ class Human < Player
       puts "Sorry, invalid choice. Please try again."
     end
 
-    self.move = @move_generator.new_move(choice)
-    record_move
+    super(choice)
   end
 
   def display_move_menu
@@ -102,66 +106,54 @@ class Human < Player
 end
 
 class Chappie < Player
-  def set_name
-    self.name = 'Chappie'
+  def initialize
+    super
+    @name = 'Chappie'
   end
 
   def choose
-    @move_generator.repeat = (won? || tied?)
-    self.move = @move_generator.new_move
-    record_move
+    move_generator.repeat = (won? || tied?)
+    super
   end
 end
 
 class R2D2 < Player
   def initialize
     super
-    @move_generator.weight_move('paper', 0)
-    @move_generator.weight_move('scissors', 0)
-    @move_generator.weight_move('lizard', 0)
-    @move_generator.weight_move('spock', 0)
-  end
-
-  def set_name
-    self.name = 'R2D2'
+    @name = 'R2D2'
+    move_generator.weight_move('paper', 0)
+    move_generator.weight_move('scissors', 0)
+    move_generator.weight_move('lizard', 0)
+    move_generator.weight_move('spock', 0)
   end
 end
 
 class Hal < Player
   def initialize
     super
-    @move_generator.new_move_every = 3
-  end
-
-  def set_name
-    self.name = 'Hal'
+    @name = 'Hal'
+    move_generator.new_move_every = 3
   end
 end
 
 class Sonny < Player
   def initialize
     super
-    @move_generator.weight_move('lizard', 0)
-    @move_generator.weight_move('spock', 0)
-  end
-
-  def set_name
-    self.name = 'Sonny'
+    @name = 'Sonny'
+    move_generator.weight_move('lizard', 0)
+    move_generator.weight_move('spock', 0)
   end
 end
 
 class Number5 < Player
   def initialize
     super
-    @move_generator.weight_move('rock', 1)
-    @move_generator.weight_move('paper', 2)
-    @move_generator.weight_move('scissors', 3)
-    @move_generator.weight_move('lizard', 4)
-    @move_generator.weight_move('spock', 5)
-  end
-
-  def set_name
-    self.name = 'Number 5'
+    @name = 'Number 5'
+    move_generator.weight_move('rock', 1)
+    move_generator.weight_move('paper', 2)
+    move_generator.weight_move('scissors', 3)
+    move_generator.weight_move('lizard', 4)
+    move_generator.weight_move('spock', 5)
   end
 end
 
@@ -173,65 +165,50 @@ class Move
   end
 
   def >(other_move)
-    beat?(other_move.value)
-  end
-
-  def <(other_move)
-    other_move.beat?(value)
+    beats.include?(other_move.value)
   end
 
   def to_s
     value.clone
   end
+
+  private
+
+  attr_reader :beats
 end
 
 class Rock < Move
   def initialize
     super('rock')
-  end
-
-  def beat?(type)
-    ['scissors', 'lizard'].include?(type)
+    @beats = ['scissors', 'lizard']
   end
 end
 
 class Paper < Move
   def initialize
     super('paper')
-  end
-
-  def beat?(type)
-    ['rock', 'spock'].include?(type)
+    @beats = ['rock', 'spock']
   end
 end
 
 class Scissors < Move
   def initialize
     super('scissors')
-  end
-
-  def beat?(type)
-    ['paper', 'lizard'].include?(type)
+    @beats = ['paper', 'lizard']
   end
 end
 
 class Lizard < Move
   def initialize
     super('lizard')
-  end
-
-  def beat?(type)
-    ['paper', 'spock'].include?(type)
+    @beats = ['paper', 'spock']
   end
 end
 
 class Spock < Move
   def initialize
     super('spock')
-  end
-
-  def beat?(type)
-    ['rock', 'scissors'].include?(type)
+    @beats = ['rock', 'scissors']
   end
 end
 
@@ -476,7 +453,7 @@ and ties with itself."
     if human.move > computer.move
       human.increment_score
       update_winner('human')
-    elsif human.move < computer.move
+    elsif computer.move > human.move
       computer.increment_score
       update_winner('computer')
     else
