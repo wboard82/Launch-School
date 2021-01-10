@@ -1,0 +1,19 @@
+What are the benefits of using Object Oriented Programming in Ruby? Think of as many as you can.
+
+- OO allows us to structure our code in smaller units as projects grow larger
+  and larger
+- OO allows us to think at a higher level of abstraction. As we create classes
+  that handle lower level details, we can use them without needing to think
+  about how they are implemented, freeing us up to do higher level work more
+  efficiently.
+- OO provides encapsulation to hide implementation details within classes and
+  modules. This means that users of a module or class are only able to interact
+  with the module or class in ways that the author intended. If the code is well
+  designed, this should prevent unexpected behavior that can occur when changes
+  can be made from any point in the code.
+- OO allows programmers to create code that models the real world.
+- OO makes it easier to reuse code, since classes and modules can be separated
+  from each other rather than intricately linked.
+- Namespaces
+- Cuts down on duplication
+
