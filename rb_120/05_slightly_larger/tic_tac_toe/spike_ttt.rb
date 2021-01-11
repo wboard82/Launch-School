@@ -2,17 +2,11 @@ require 'pry'
 
 class Board
   def draw
-    puts "     |     |"
-    puts "  #{@squares[1]}  |  #{@squares[2]}  |  #{@squares[3]}"
-    puts "     |     |"
-    puts "-----|-----|------"
-    puts "     |     |"
-    puts "  #{@squares[4]}  |  #{@squares[5]}  |  #{@squares[6]}"
-    puts "     |     |"
-    puts "-----|-----|------"
-    puts "     |     |"
-    puts "  #{@squares[7]}  |  #{@squares[8]}  |  #{@squares[9]}"
-    puts "     |     |"
+    draw_row(1, 2, 3)
+    draw_line
+    draw_row(4, 5, 6)
+    draw_line
+    draw_row(7, 8, 9)
   end
 
   def reset
@@ -56,7 +50,7 @@ class Board
   WINNING_LINES = ROWS + COLS + DIAGS
 
   def initialize
-    @squares = { }
+    @squares = {}
     reset
   end
 
@@ -64,11 +58,19 @@ class Board
     winning_marker = @squares[line[0]].marker
 
     if winning_marker != Square::INITIAL_MARKER &&
-        line.all? { |key| @squares[key].marker == winning_marker }
+       line.all? { |key| @squares[key].marker == winning_marker }
       winning_marker
-    else
-      nil
     end
+  end
+
+  def draw_row(a, b, c)
+    puts "     |     |"
+    puts "  #{@squares[a]}  |  #{@squares[b]}  |  #{@squares[c]}"
+    puts "     |     |"
+  end
+
+  def draw_line
+    puts "-----|-----|------"
   end
 end
 
@@ -103,21 +105,7 @@ end
 class TTTGame
   def play
     display_welcome_message
-
-    loop do
-      display_board
-
-      loop do
-        current_player_moves
-        break if board.full? || board.someone_won?
-        clear_screen_and_display_board if human_turn?
-      end
-
-      clear_screen_and_display_board
-      display_result
-      break unless play_again?
-      reset
-    end
+    main_game
     display_goodbye_message
   end
 
@@ -137,6 +125,26 @@ class TTTGame
 
   def clear
     system('clear') || system('cls')
+  end
+
+  def main_game
+    loop do
+      display_board
+      player_move
+
+      clear_screen_and_display_board
+      display_result
+      break unless play_again?
+      reset
+    end
+  end
+
+  def player_move
+    loop do
+      current_player_moves
+      break if board.full? || board.someone_won?
+      clear_screen_and_display_board if human_turn?
+    end
   end
 
   def human_moves
