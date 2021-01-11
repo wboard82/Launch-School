@@ -25,6 +25,20 @@ class Board
     @squares.keys.filter { |key| @squares[key].unmarked? }
   end
 
+  def list_unmarked_keys
+    join_or(unmarked_keys)
+  end
+
+  def join_or(list, delim: ',', final: 'or')
+    if list.size == 1
+      return list[0].to_s
+    elsif list.size == 2
+      return "#{list[0]} #{final} #{list[1]}"
+    end
+
+    "#{list[0..-2].join(delim + ' ')}#{delim} #{final} #{list[-1]}"
+  end
+
   def full?
     unmarked_keys.empty?
   end
@@ -95,10 +109,34 @@ class Square
 end
 
 class Player
-  attr_reader :marker
+  attr_reader :marker, :score
+
+  def increment_score
+    @score += 1
+  end
 
   def initialize(marker)
     @marker = marker
+  end
+end
+
+class Human < Player
+  def mark(board)
+    puts "Choose a square (#{board.list_unmarked_keys}):"
+    square = nil
+    loop do
+      square = gets.chomp.to_i
+      break if board.unmarked_keys.include?(square)
+      puts "Sorry, that's not a valid choice."
+    end
+
+    board[square] = marker
+  end
+end
+
+class Computer < Player
+  def mark(board)
+    board[board.unmarked_keys.sample] = marker
   end
 end
 
@@ -118,8 +156,8 @@ class TTTGame
 
   def initialize
     @board = Board.new
-    @human = Player.new(HUMAN_MARKER)
-    @computer = Player.new(COMPUTER_MARKER)
+    @human = Human.new(HUMAN_MARKER)
+    @computer = Computer.new(COMPUTER_MARKER)
     @current_player = :human
   end
 
@@ -148,19 +186,11 @@ class TTTGame
   end
 
   def human_moves
-    puts "Choose a square (#{board.unmarked_keys.join(', ')}): "
-    square = nil
-    loop do
-      square = gets.chomp.to_i
-      break if board.unmarked_keys.include?(square)
-      puts "Sorry, that's not a valid choice."
-    end
-
-    board[square] = human.marker
+    human.mark(board)
   end
 
   def computer_moves
-    board[board.unmarked_keys.sample] = computer.marker
+    computer.mark(board)
   end
 
   def current_player_moves
