@@ -29,16 +29,6 @@ class Board
     join_or(unmarked_keys)
   end
 
-  def join_or(list, delim: ',', final: 'or')
-    if list.size == 1
-      return list[0].to_s
-    elsif list.size == 2
-      return "#{list[0]} #{final} #{list[1]}"
-    end
-
-    "#{list[0..-2].join(delim + ' ')}#{delim} #{final} #{list[-1]}"
-  end
-
   def full?
     unmarked_keys.empty?
   end
@@ -56,6 +46,49 @@ class Board
     nil
   end
 
+  def imminent_winner(marker)
+    # For each WINNING_LINE:
+    #   - see if there is only one open square
+    #   - if there is, save that key
+    #   - determine if the other keys are all equal to the marker
+    #   - if they are, return the saved key
+    #   - else return nil
+    WINNING_LINES.each do |line|
+      empty_key = find_single_empty_square(line)
+      next unless empty_key
+      if (line - [empty_key]).all? { |key| @squares[key].marker == marker }
+        return empty_key
+      end
+    end
+
+    nil
+  end
+
+  def imminent_loser(marker)
+    WINNING_LINES.each do |line|
+      empty_key = find_single_empty_square(line)
+      next unless empty_key
+      if (line - [empty_key]).all? { |key| @squares[key].marker != marker }
+        return empty_key
+      end
+    end
+
+    nil
+  end
+
+  def find_single_empty_square(line)
+    empty_key = nil
+
+    line.each do |key|
+      if @squares[key].unmarked?
+        return nil if empty_key
+        empty_key = key
+      end
+    end
+
+    empty_key
+  end
+
   private
 
   ROWS = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
@@ -66,6 +99,16 @@ class Board
   def initialize
     @squares = {}
     reset
+  end
+
+  def join_or(list, delim: ',', final: 'or')
+    if list.size == 1
+      return list[0].to_s
+    elsif list.size == 2
+      return "#{list[0]} #{final} #{list[1]}"
+    end
+
+    "#{list[0..-2].join(delim + ' ')}#{delim} #{final} #{list[-1]}"
   end
 
   def line_winner(line)
@@ -136,7 +179,24 @@ end
 
 class Computer < Player
   def mark(board)
-    board[board.unmarked_keys.sample] = marker
+    winning_move = board.imminent_winner(marker)
+    if winning_move
+      board[winning_move] = marker
+      return
+    end
+
+    blocking_move = board.imminent_loser(marker)
+    if blocking_move
+      board[blocking_move] = marker
+      return
+    end
+
+    move_options = board.unmarked_keys
+    if move_options.include?(5)
+      board[board[5] = marker]
+    else
+      board[board.unmarked_keys.sample] = marker
+    end
   end
 end
 
