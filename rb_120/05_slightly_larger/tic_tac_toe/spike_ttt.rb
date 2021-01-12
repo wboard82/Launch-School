@@ -151,8 +151,13 @@ class Player
     @score += 1
   end
 
+  def reset_score
+    @score = 0
+  end
+
   def initialize(marker)
     @marker = marker
+    reset_score
   end
 end
 
@@ -221,16 +226,14 @@ class TTTGame
   def main_game
     loop do
       display_board
-      player_moves
-
-      clear_screen_and_display_board
+      players_take_turns
       display_result
       break unless play_again?
       reset
     end
   end
 
-  def player_moves
+  def players_take_turns
     loop do
       current_player.mark(board)
       break if board.full? || board.someone_won?
@@ -284,13 +287,18 @@ class TTTGame
     clear_screen_and_display_board
 
     case board.winning_marker
-    when HUMAN_MARKER
+    when human.marker
       puts "#{human.marker} won!"
-    when COMPUTER_MARKER
+      human.increment_score
+    when computer.marker
       puts "#{computer.marker} won!"
+      computer.increment_score
     else
       puts "The board is full. It's a tie!"
     end
+    puts ""
+    display_score
+    puts ""
   end
 
   def display_goodbye_message
@@ -307,6 +315,11 @@ class TTTGame
     puts ""
     board.draw
     puts ""
+  end
+
+  def display_score
+    puts "You have #{human.score} point#{human.score == 1 ? "" : "s"}."
+    puts "The computer has #{computer.score} point#{computer.score == 1 ? "" : "s"}."
   end
 end
 
