@@ -39,24 +39,21 @@ class Board
 
   def winning_marker
     WINNING_LINES.each do |line|
-      winner = line_winner(line)
+      winner = line_winning_marker(line)
       return winner if winner
     end
 
     nil
   end
 
-  def imminent_winner(marker)
-    # For each WINNING_LINE:
-    #   - see if there is only one open square
-    #   - if there is, save that key
-    #   - determine if the other keys are all equal to the marker
-    #   - if they are, return the saved key
-    #   - else return nil
+  def imminent_game_over(marker, comparison)
     WINNING_LINES.each do |line|
       empty_key = find_single_empty_square(line)
       next unless empty_key
-      if (line - [empty_key]).all? { |key| @squares[key].marker == marker }
+
+      #binding.pry
+      imminent_winner = line_winning_marker(line - [empty_key])
+      if imminent_winner && imminent_winner.send(comparison, marker)
         return empty_key
       end
     end
@@ -64,16 +61,12 @@ class Board
     nil
   end
 
-  def imminent_loser(marker)
-    WINNING_LINES.each do |line|
-      empty_key = find_single_empty_square(line)
-      next unless empty_key
-      if (line - [empty_key]).all? { |key| @squares[key].marker != marker }
-        return empty_key
-      end
-    end
+  def imminent_winner(marker)
+    imminent_game_over(marker, :==)
+  end
 
-    nil
+  def imminent_loser(marker)
+    imminent_game_over(marker, :!=)
   end
 
   def find_single_empty_square(line)
@@ -111,7 +104,7 @@ class Board
     "#{list[0..-2].join(delim + ' ')}#{delim} #{final} #{list[-1]}"
   end
 
-  def line_winner(line)
+  def line_winning_marker(line)
     winning_marker = @squares[line[0]].marker
 
     if winning_marker != Square::INITIAL_MARKER &&
