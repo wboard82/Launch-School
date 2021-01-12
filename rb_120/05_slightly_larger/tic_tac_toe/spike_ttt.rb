@@ -51,9 +51,9 @@ class Board
       empty_key = find_single_empty_square(line)
       next unless empty_key
 
-      #binding.pry
-      imminent_winner = line_winning_marker(line - [empty_key])
-      if imminent_winner && imminent_winner.send(comparison, marker)
+      imminent_winning_marker = line_winning_marker(line - [empty_key])
+      if imminent_winning_marker &&
+         imminent_winning_marker.send(comparison, marker)
         return empty_key
       end
     end
@@ -61,11 +61,11 @@ class Board
     nil
   end
 
-  def imminent_winner(marker)
+  def winning_move(marker)
     imminent_game_over(marker, :==)
   end
 
-  def imminent_loser(marker)
+  def blocking_move(marker)
     imminent_game_over(marker, :!=)
   end
 
@@ -172,13 +172,13 @@ end
 
 class Computer < Player
   def mark(board)
-    winning_move = board.imminent_winner(marker)
+    winning_move = board.winning_move(marker)
     if winning_move
       board[winning_move] = marker
       return
     end
 
-    blocking_move = board.imminent_loser(marker)
+    blocking_move = board.blocking_move(marker)
     if blocking_move
       board[blocking_move] = marker
       return
