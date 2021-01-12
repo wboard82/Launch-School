@@ -158,7 +158,7 @@ class TTTGame
     @board = Board.new
     @human = Human.new(HUMAN_MARKER)
     @computer = Computer.new(COMPUTER_MARKER)
-    @current_player = :human
+    @current_player = human
   end
 
   def clear
@@ -168,7 +168,7 @@ class TTTGame
   def main_game
     loop do
       display_board
-      player_move
+      player_moves
 
       clear_screen_and_display_board
       display_result
@@ -177,40 +177,24 @@ class TTTGame
     end
   end
 
-  def player_move
+  def player_moves
     loop do
-      current_player_moves
+      current_player.mark(board)
       break if board.full? || board.someone_won?
+      toggle_player
       clear_screen_and_display_board if human_turn?
     end
   end
 
-  def human_moves
-    human.mark(board)
-  end
-
-  def computer_moves
-    computer.mark(board)
-  end
-
-  def current_player_moves
-    case current_player
-    when :human then human_moves
-    when :computer then computer_moves
-    end
-
-    toggle_player
-  end
-
   def toggle_player
     case current_player
-    when :computer then @current_player = :human
-    when :human then @current_player = :computer
+    when computer then @current_player = human
+    when human then @current_player = computer
     end
   end
 
   def human_turn?
-    current_player == :human
+    current_player == human
   end
 
   def play_again?
@@ -234,7 +218,7 @@ class TTTGame
   end
 
   def reset_current_player
-    @current_player = :human
+    @current_player = human
   end
 
   def display_welcome_message
