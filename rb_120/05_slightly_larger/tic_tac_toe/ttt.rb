@@ -52,10 +52,7 @@ class Board
       next unless empty_key
 
       imminent_winning_marker = line_winning_marker(line - [empty_key])
-      if imminent_winning_marker &&
-         imminent_winning_marker.send(comparison, marker)
-        return empty_key
-      end
+      return empty_key if imminent_winning_marker&.send(comparison, marker)
     end
 
     nil
@@ -95,12 +92,8 @@ class Board
   end
 
   def join_or(list, delim: ',', final: 'or')
-    if list.size == 1
-      return list[0].to_s
-    elsif list.size == 2
-      return "#{list[0]} #{final} #{list[1]}"
-    end
-
+    return list[0].to_s if list.size == 1
+    return "#{list[0]} #{final} #{list[1]}" if list.size == 2
     "#{list[0..-2].join(delim + ' ')}#{delim} #{final} #{list[-1]}"
   end
 
@@ -177,24 +170,20 @@ end
 
 class Computer < Player
   def mark(board)
-    winning_move = board.winning_move(marker)
-    if winning_move
-      board[winning_move] = marker
-      return
-    end
+    move = board.winning_move(marker)
+    move ||= board.blocking_move(marker)
+    move ||= regular_move(board)
 
-    blocking_move = board.blocking_move(marker)
-    if blocking_move
-      board[blocking_move] = marker
-      return
-    end
+    board[move] = marker
+  end
 
+  private
+
+  def regular_move(board)
     move_options = board.unmarked_keys
-    if move_options.include?(5)
-      board[board[5] = marker]
-    else
-      board[board.unmarked_keys.sample] = marker
-    end
+    return 5 if move_options.include?(5)
+
+    board.unmarked_keys.sample
   end
 end
 
@@ -228,18 +217,22 @@ class TTTGame
     loop do
       puts "The first player to #{GOAL_SCORE} wins!"
 
-      loop do
-        display_board
-        players_take_turns
-        display_result
-        break if human.score == GOAL_SCORE || computer.score == GOAL_SCORE
-        break unless continue?
-        reset
-      end
+      play_tournament
 
       display_tournament_result
       break unless play_again?
       reset_tournament
+    end
+  end
+
+  def play_tournament
+    loop do
+      display_board
+      players_take_turns
+      display_result
+      break if human.score == GOAL_SCORE || computer.score == GOAL_SCORE
+      break unless continue?
+      reset
     end
   end
 
@@ -318,7 +311,13 @@ class TTTGame
 
   def display_result
     clear_screen_and_display_board
+    display_winner
+    puts ""
+    display_score
+    puts ""
+  end
 
+  def display_winner
     case board.winning_marker
     when human.marker
       puts "#{human.marker} won!"
@@ -329,13 +328,11 @@ class TTTGame
     else
       puts "The board is full. It's a tie!"
     end
-    puts ""
-    display_score
-    puts ""
   end
 
   def display_goodbye_message
     puts "Thanks for playing Tic Tac Toe! Goodbye!"
+    puts ""
   end
 
   def clear_screen_and_display_board
@@ -351,8 +348,9 @@ class TTTGame
   end
 
   def display_score
-    puts "You have #{human.score} point#{human.score == 1 ? "" : "s"}."
-    puts "The computer has #{computer.score} point#{computer.score == 1 ? "" : "s"}."
+    puts "You have #{human.score} point#{human.score == 1 ? '' : 's'}."
+    puts "The computer has #{computer.score} \
+point#{computer.score == 1 ? '' : 's'}."
   end
 end
 
