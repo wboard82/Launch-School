@@ -154,7 +154,7 @@ end
 
 class Human < Player
   def mark(board)
-    puts "Choose a square (#{TTTGame::join_or(board.unmarked_keys)}):"
+    puts "Choose a square (#{TTTGame.join_or(board.unmarked_keys)}):"
     square = nil
     loop do
       square = gets.chomp.to_i
@@ -271,8 +271,6 @@ class TTTGame
     display_tournament_welcome
 
     loop do
-      clear_screen
-      display_board if human_turn?
       play_single_game
       display_game_result
       break if tournament_winner? || quit_tournament?
@@ -317,6 +315,7 @@ class TTTGame
   end
 
   def play_single_game
+    clear_screen_and_display_board if human_turn?
     loop do
       current_player.mark(board)
       break if board.full? || board.someone_won?
@@ -363,6 +362,7 @@ class TTTGame
     puts "***********************************"
     puts "***** Welcome to Tic Tac Toe! *****"
     puts "***********************************"
+    puts
     sleep 1.5
   end
 
