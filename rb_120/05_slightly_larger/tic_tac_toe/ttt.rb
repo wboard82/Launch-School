@@ -1,5 +1,14 @@
 require 'pry'
 
+# TODO:
+# - Allow human to choose which player to be
+#   - Change constants to first and second player
+#   -
+# - Allow human to choose how many games to play in a tournament
+#   - Create instance variable for number of games, replacing constant
+#   - Create function to get the number of games from the human
+#   -
+
 class Board
   def draw
     draw_row(1, 2, 3)
@@ -9,7 +18,7 @@ class Board
     draw_row(7, 8, 9)
   end
 
-  def reset
+  def clear
     (1..9).each { |key| @squares[key] = Square.new }
   end
 
@@ -88,7 +97,7 @@ class Board
 
   def initialize
     @squares = {}
-    reset
+    clear
   end
 
   def join_or(list, delim: ',', final: 'or')
@@ -190,83 +199,108 @@ end
 class TTTGame
   def play
     display_welcome_message
-    main_game
+    loop do
+      set_up_tournament
+      play_tournament
+      display_tournament_result
+      break unless play_another_tournament?
+    end
     display_goodbye_message
   end
 
   private
 
-  HUMAN_MARKER = 'X'
-  COMPUTER_MARKER = 'O'
-  GOAL_SCORE = 1
+  P1_MARKER = 'X'
+  P2_MARKER = 'O'
 
-  attr_reader :board, :human, :computer, :current_player
+  attr_reader :board, :human, :computer, :current_player, :goal_score
 
   def initialize
     @board = Board.new
-    @human = Human.new(HUMAN_MARKER)
-    @computer = Computer.new(COMPUTER_MARKER)
+    @human = Human.new(P1_MARKER)
+    @computer = Computer.new(P2_MARKER)
     @current_player = human
   end
 
-  def clear
+  def set_up_tournament
+    human.reset_score
+    computer.reset_score
+    set_up_new_game
+    clear_screen
+    set_goal_score
+  end
+
+  def set_goal_score
+    puts "Let's play a Tic-Tac-Tournament!"
+    puts ""
+    puts "How many wins should we play to? (1 - 5)"
+    wins = nil
+    loop do
+      wins = gets.chomp.to_i
+      break if (1..5).cover?(wins)
+      puts "I'm sorry, please enter a number from 1 - 5."
+    end
+    @goal_score = wins
+  end
+
+  def clear_screen
     system('clear') || system('cls')
   end
 
-  def main_game
-    loop do
-      puts "The first player to #{GOAL_SCORE} wins!"
-
-      play_tournament
-
-      display_tournament_result
-      break unless play_again?
-      reset_tournament
-    end
-  end
-
   def play_tournament
+    display_tournament_welcome
+
     loop do
       display_board
-      players_take_turns
-      display_result
-      break if human.score == GOAL_SCORE || computer.score == GOAL_SCORE
-      break unless continue?
-      reset
+      play_single_game
+      display_game_result
+      break if tournament_winner? || quit_tournament?
+      set_up_new_game
+      puts "Let's play again!"
+      puts ""
     end
   end
 
-  def reset_tournament
-    human.reset_score
-    computer.reset_score
-    reset
-    puts "Let's play again!"
-    puts ""
+  def tournament_winner?
+    human.score == goal_score || computer.score == goal_score
   end
 
-  def continue?
-    puts "Press ENTER to continue or 'q' to quit this tournament."
+  def display_tournament_welcome
+    clear_screen
+    puts "Welcome to the Tic-Tac-Tournament!!!"
+    display_goal_score
+    puts
+  end
+
+  def display_goal_score
+    puts "The first player with #{goal_score} wins the tournament."
+  end
+
+  def quit_tournament?
+    puts "Press ENTER to continue"
+    puts "'q' to quit the tournament."
     continue = gets.chomp
-    continue.downcase != 'q'
+    continue.downcase == 'q'
   end
 
   def display_tournament_result
-    if human.score == GOAL_SCORE
-      puts "Congrats! You are the first to #{GOAL_SCORE} points!"
+    if human.score == goal_score
+      puts "Congrats! You are the first to #{goal_score} points!"
       puts "YOU WIN THE TOURNAMENT!"
-    elsif computer.score == GOAL_SCORE
-      puts "The computer is the first to #{GOAL_SCORE} points."
+    elsif computer.score == goal_score
+      puts "The computer is the first to #{goal_score} points."
       puts "The computer won the tournament."
     end
     puts ""
   end
 
-  def players_take_turns
+  def play_single_game
     loop do
       current_player.mark(board)
       break if board.full? || board.someone_won?
       toggle_player
-      clear_screen_and_display_board if human_turn?
+      sleep 0.5 if human_turn?
+      clear_screen_and_display_board
     end
   end
 
@@ -281,10 +315,10 @@ class TTTGame
     current_player == human
   end
 
-  def play_again?
+  def play_another_tournament?
     answer = nil
     loop do
-      puts "Would you like to play another tournament? (y/n)"
+      puts "Would you like to play another Tic-Tac-Tournament? (y/n)"
       answer = gets.chomp.downcase
       break if %w(y n yes no).include? answer
       puts "Sorry, anwer must be y or n."
@@ -293,9 +327,9 @@ class TTTGame
     answer[0] == 'y'
   end
 
-  def reset
-    board.reset
-    clear
+  def set_up_new_game
+    board.clear
+    clear_screen
     reset_current_player
   end
 
@@ -304,16 +338,19 @@ class TTTGame
   end
 
   def display_welcome_message
-    clear
-    puts "Welcome to Tic Tac Toe!"
-    puts ""
+    clear_screen
+    puts "***********************************"
+    puts "***** Welcome to Tic Tac Toe! *****"
+    puts "***********************************"
+    sleep 1.5
   end
 
-  def display_result
+  def display_game_result
     clear_screen_and_display_board
     display_winner
     puts ""
     display_score
+    display_goal_score unless tournament_winner?
     puts ""
   end
 
@@ -336,7 +373,7 @@ class TTTGame
   end
 
   def clear_screen_and_display_board
-    clear
+    clear_screen
     display_board
   end
 
