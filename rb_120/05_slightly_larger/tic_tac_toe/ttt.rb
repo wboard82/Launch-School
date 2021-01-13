@@ -209,6 +209,7 @@ class TTTGame
 
   HUMAN_MARKER = 'X'
   COMPUTER_MARKER = 'O'
+  GOAL_SCORE = 1
 
   attr_reader :board, :human, :computer, :current_player
 
@@ -225,12 +226,46 @@ class TTTGame
 
   def main_game
     loop do
-      display_board
-      players_take_turns
-      display_result
+      puts "The first player to #{GOAL_SCORE} wins!"
+
+      loop do
+        display_board
+        players_take_turns
+        display_result
+        break if human.score == GOAL_SCORE || computer.score == GOAL_SCORE
+        break unless continue?
+        reset
+      end
+
+      display_tournament_result
       break unless play_again?
-      reset
+      reset_tournament
     end
+  end
+
+  def reset_tournament
+    human.reset_score
+    computer.reset_score
+    reset
+    puts "Let's play again!"
+    puts ""
+  end
+
+  def continue?
+    puts "Press ENTER to continue or 'q' to quit this tournament."
+    continue = gets.chomp
+    continue.downcase != 'q'
+  end
+
+  def display_tournament_result
+    if human.score == GOAL_SCORE
+      puts "Congrats! You are the first to #{GOAL_SCORE} points!"
+      puts "YOU WIN THE TOURNAMENT!"
+    elsif computer.score == GOAL_SCORE
+      puts "The computer is the first to #{GOAL_SCORE} points."
+      puts "The computer won the tournament."
+    end
+    puts ""
   end
 
   def players_take_turns
@@ -256,7 +291,7 @@ class TTTGame
   def play_again?
     answer = nil
     loop do
-      puts "Would you like to play again? (y/n)"
+      puts "Would you like to play another tournament? (y/n)"
       answer = gets.chomp.downcase
       break if %w(y n yes no).include? answer
       puts "Sorry, anwer must be y or n."
@@ -268,8 +303,6 @@ class TTTGame
   def reset
     board.reset
     clear
-    puts "Let's play again!"
-    puts ""
     reset_current_player
   end
 
