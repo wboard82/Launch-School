@@ -1,16 +1,16 @@
 Board	ttt.rb	/^class Board$/
-COLS	ttt.rb	94
+COLS	ttt.rb	89
 Computer	ttt.rb	/^class Computer < Player$/
-DIAGS	ttt.rb	95
+DIAGS	ttt.rb	90
 Human	ttt.rb	/^class Human < Player$/
-INITIAL_MARKER	ttt.rb	138
-P1_MARKER	ttt.rb	214
-P2_MARKER	ttt.rb	215
+INITIAL_MARKER	ttt.rb	127
+P1_MARKER	ttt.rb	209
+P2_MARKER	ttt.rb	210
 Player	ttt.rb	/^class Player$/
-ROWS	ttt.rb	93
+ROWS	ttt.rb	88
 Square	ttt.rb	/^class Square$/
 TTTGame	ttt.rb	/^class TTTGame$/
-WINNING_LINES	ttt.rb	96
+WINNING_LINES	ttt.rb	91
 []	ttt.rb	/^  def [](sqaure)$/
 []=	ttt.rb	/^  def []=(square, marker)$/
 blocking_move	ttt.rb	/^  def blocking_move(marker)$/
@@ -22,6 +22,7 @@ computer	ttt.rb	/^  attr_reader :board, :human, :computer, :current_/
 current_player	ttt.rb	/^  attr_reader :board, :human, :computer, :current_/
 display_board	ttt.rb	/^  def display_board$/
 display_game_result	ttt.rb	/^  def display_game_result$/
+display_goal_score	ttt.rb	/^  def display_goal_score$/
 display_goodbye_message	ttt.rb	/^  def display_goodbye_message$/
 display_score	ttt.rb	/^  def display_score$/
 display_tournament_result	ttt.rb	/^  def display_tournament_result$/
@@ -42,9 +43,10 @@ initialize	ttt.rb	/^  def initialize$/
 initialize	ttt.rb	/^  def initialize(marker = INITIAL_MARKER)$/
 initialize	ttt.rb	/^  def initialize(marker)$/
 initialize	ttt.rb	/^  def initialize$/
-join_or	ttt.rb	/^  def join_or(list, delim: ',', final: 'or')$/
+join_or	ttt.rb	/^  def self.join_or(list, delim: ',', final: 'or')$/
 line_winning_marker	ttt.rb	/^  def line_winning_marker(line)$/
 list_unmarked_keys	ttt.rb	/^  def list_unmarked_keys$/
+make_players	ttt.rb	/^  def make_players(human_marker, computer_marker)$/
 mark	ttt.rb	/^  def mark(board)$/
 mark	ttt.rb	/^  def mark(board)$/
 marker	ttt.rb	/^  attr_accessor :marker$/
@@ -54,6 +56,7 @@ play	ttt.rb	/^  def play$/
 play_another_tournament?	ttt.rb	/^  def play_another_tournament?$/
 play_single_game	ttt.rb	/^  def play_single_game$/
 play_tournament	ttt.rb	/^  def play_tournament$/
+prompt_for_answer	ttt.rb	/^  def prompt_for_answer(choices)$/
 quit_tournament?	ttt.rb	/^  def quit_tournament?$/
 regular_move	ttt.rb	/^  def regular_move(board)$/
 reset_current_player	ttt.rb	/^  def reset_current_player$/
@@ -61,7 +64,7 @@ reset_score	ttt.rb	/^  def reset_score$/
 score	ttt.rb	/^  attr_reader :marker, :score$/
 set_goal_score	ttt.rb	/^  def set_goal_score$/
 set_up_new_game	ttt.rb	/^  def set_up_new_game$/
-set_up_new_tournament	ttt.rb	/^  def set_up_new_tournament$/
+set_up_players	ttt.rb	/^  def set_up_players$/
 set_up_tournament	ttt.rb	/^  def set_up_tournament$/
 someone_won?	ttt.rb	/^  def someone_won?$/
 to_s	ttt.rb	/^  def to_s$/

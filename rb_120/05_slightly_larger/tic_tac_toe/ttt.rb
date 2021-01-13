@@ -2,11 +2,6 @@ require 'pry'
 
 # TODO:
 # - Allow human to choose which player to be
-#   - Change constants to first and second player
-#   -
-# - Allow human to choose how many games to play in a tournament
-#   - Create instance variable for number of games, replacing constant
-#   - Create function to get the number of games from the human
 #   -
 
 class Board
@@ -57,11 +52,11 @@ class Board
 
   def imminent_game_over(marker, comparison)
     WINNING_LINES.each do |line|
-      empty_key = find_single_empty_square(line)
-      next unless empty_key
+      empty_square = find_single_empty_square(line)
+      next unless empty_square
 
-      imminent_winning_marker = line_winning_marker(line - [empty_key])
-      return empty_key if imminent_winning_marker&.send(comparison, marker)
+      imminent_winning_marker = line_winning_marker(line - [empty_square])
+      return empty_square if imminent_winning_marker&.send(comparison, marker)
     end
 
     nil
@@ -98,12 +93,6 @@ class Board
   def initialize
     @squares = {}
     clear
-  end
-
-  def join_or(list, delim: ',', final: 'or')
-    return list[0].to_s if list.size == 1
-    return "#{list[0]} #{final} #{list[1]}" if list.size == 2
-    "#{list[0..-2].join(delim + ' ')}#{delim} #{final} #{list[-1]}"
   end
 
   def line_winning_marker(line)
@@ -165,7 +154,7 @@ end
 
 class Human < Player
   def mark(board)
-    puts "Choose a square (#{board.list_unmarked_keys}):"
+    puts "Choose a square (#{TTTGame::join_or(board.unmarked_keys)}):"
     square = nil
     loop do
       square = gets.chomp.to_i
@@ -197,6 +186,12 @@ class Computer < Player
 end
 
 class TTTGame
+  def self.join_or(list, delim: ',', final: 'or')
+    return list[0].to_s if list.size == 1
+    return "#{list[0]} #{final} #{list[1]}" if list.size == 2
+    "#{list[0..-2].join(delim + ' ')}#{delim} #{final} #{list[-1]}"
+  end
+
   def play
     display_welcome_message
     loop do
@@ -204,6 +199,7 @@ class TTTGame
       play_tournament
       display_tournament_result
       break unless play_another_tournament?
+      clear_screen
     end
     display_goodbye_message
   end
@@ -217,22 +213,46 @@ class TTTGame
 
   def initialize
     @board = Board.new
-    @human = Human.new(P1_MARKER)
-    @computer = Computer.new(P2_MARKER)
-    @current_player = human
   end
 
   def set_up_tournament
+    set_up_players
+    set_up_new_game
+    set_goal_score
     human.reset_score
     computer.reset_score
-    set_up_new_game
-    clear_screen
-    set_goal_score
+  end
+
+  def set_up_players
+    puts "Would you like to go first (X) or second (O)?"
+    puts "Enter X or O"
+    answer = prompt_for_answer(['x', 'o'])
+    case answer
+    when 'x' then make_players(P1_MARKER, P2_MARKER)
+    when 'o' then make_players(P2_MARKER, P1_MARKER)
+    end
+
+    puts
+  end
+
+  def prompt_for_answer(choices)
+    answer = nil
+    loop do
+      answer = gets.chomp.downcase
+      break if choices.include?(answer)
+      puts "Please enter #{join_or(choices)}."
+    end
+
+    answer
+  end
+
+  def make_players(human_marker, computer_marker)
+    @human = Human.new(human_marker)
+    @computer = Computer.new(computer_marker)
+    reset_current_player
   end
 
   def set_goal_score
-    puts "Let's play a Tic-Tac-Tournament!"
-    puts ""
     puts "How many wins should we play to? (1 - 5)"
     wins = nil
     loop do
@@ -251,7 +271,8 @@ class TTTGame
     display_tournament_welcome
 
     loop do
-      display_board
+      clear_screen
+      display_board if human_turn?
       play_single_game
       display_game_result
       break if tournament_winner? || quit_tournament?
@@ -267,9 +288,10 @@ class TTTGame
 
   def display_tournament_welcome
     clear_screen
-    puts "Welcome to the Tic-Tac-Tournament!!!"
-    display_goal_score
+    puts "Starting the Tic-Tac-Tournament!!!"
     puts
+    display_goal_score
+    sleep 2
   end
 
   def display_goal_score
@@ -298,9 +320,9 @@ class TTTGame
     loop do
       current_player.mark(board)
       break if board.full? || board.someone_won?
+      clear_screen_and_display_board
       toggle_player
       sleep 0.5 if human_turn?
-      clear_screen_and_display_board
     end
   end
 
@@ -329,12 +351,11 @@ class TTTGame
 
   def set_up_new_game
     board.clear
-    clear_screen
     reset_current_player
   end
 
   def reset_current_player
-    @current_player = human
+    @current_player = (human.marker == P1_MARKER ? @human : @computer)
   end
 
   def display_welcome_message
