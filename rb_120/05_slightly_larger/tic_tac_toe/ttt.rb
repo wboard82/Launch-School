@@ -1,9 +1,5 @@
 require 'pry'
 
-# TODO:
-# - Allow human to choose which player to be
-#   -
-
 class Board
   def draw
     draw_row(1, 2, 3)
@@ -50,18 +46,6 @@ class Board
     nil
   end
 
-  def imminent_game_over(marker, comparison)
-    WINNING_LINES.each do |line|
-      empty_square = find_single_empty_square(line)
-      next unless empty_square
-
-      imminent_winning_marker = line_winning_marker(line - [empty_square])
-      return empty_square if imminent_winning_marker&.send(comparison, marker)
-    end
-
-    nil
-  end
-
   def winning_move(marker)
     imminent_game_over(marker, :==)
   end
@@ -85,10 +69,9 @@ class Board
 
   private
 
-  ROWS = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
-  COLS = [[1, 4, 7], [2, 5, 8], [3, 6, 9]]
-  DIAGS = [[1, 5, 9], [3, 5, 7]]
-  WINNING_LINES = ROWS + COLS + DIAGS
+  WINNING_LINES = [[1, 2, 3], [4, 5, 6], [7, 8, 9],
+                   [1, 4, 7], [2, 5, 8], [3, 6, 9],
+                   [1, 5, 9], [3, 5, 7]]
 
   def initialize
     @squares = {}
@@ -102,6 +85,18 @@ class Board
        line.all? { |key| @squares[key].marker == winning_marker }
       winning_marker
     end
+  end
+
+  def imminent_game_over(marker, comparison)
+    WINNING_LINES.each do |line|
+      empty_square = find_single_empty_square(line)
+      next unless empty_square
+
+      imminent_winning_marker = line_winning_marker(line - [empty_square])
+      return empty_square if imminent_winning_marker&.send(comparison, marker)
+    end
+
+    nil
   end
 
   def draw_row(a, b, c)
@@ -189,6 +184,7 @@ class TTTGame
   def self.join_or(list, delim: ',', final: 'or')
     return list[0].to_s if list.size == 1
     return "#{list[0]} #{final} #{list[1]}" if list.size == 2
+
     "#{list[0..-2].join(delim + ' ')}#{delim} #{final} #{list[-1]}"
   end
 
@@ -215,6 +211,32 @@ class TTTGame
     @board = Board.new
   end
 
+  def clear_screen
+    system('clear') || system('cls')
+  end
+
+  def user_input_choice(choices)
+    answer = nil
+    loop do
+      answer = gets.chomp.downcase
+      break if choices.include?(answer)
+      puts "Please enter #{TTTGame.join_or(choices)}."
+    end
+
+    answer
+  end
+
+  def user_input_integer(range)
+    answer = nil
+    loop do
+      answer = gets.chomp
+      break if !answer.include?(".") && range.include?(answer.to_i)
+      puts "Please enter a number from #{range.first} to #{range.last}."
+    end
+
+    answer.to_i
+  end
+
   def set_up_tournament
     set_up_players
     set_up_new_game
@@ -224,9 +246,8 @@ class TTTGame
   end
 
   def set_up_players
-    puts "Would you like to go first (X) or second (O)?"
-    puts "Enter X or O"
-    answer = prompt_for_answer(['x', 'o'])
+    puts "Would you like to go first (x) or second (o)?"
+    answer = user_input_choice(['x', 'o'])
     case answer
     when 'x' then make_players(P1_MARKER, P2_MARKER)
     when 'o' then make_players(P2_MARKER, P1_MARKER)
@@ -235,15 +256,9 @@ class TTTGame
     puts
   end
 
-  def prompt_for_answer(choices)
-    answer = nil
-    loop do
-      answer = gets.chomp.downcase
-      break if choices.include?(answer)
-      puts "Please enter #{join_or(choices)}."
-    end
-
-    answer
+  def set_up_new_game
+    board.clear
+    reset_current_player
   end
 
   def make_players(human_marker, computer_marker)
@@ -254,17 +269,12 @@ class TTTGame
 
   def set_goal_score
     puts "How many wins should we play to? (1 - 5)"
-    wins = nil
-    loop do
-      wins = gets.chomp.to_i
-      break if (1..5).cover?(wins)
-      puts "I'm sorry, please enter a number from 1 - 5."
-    end
+    wins = user_input_integer((1..5))
     @goal_score = wins
   end
 
-  def clear_screen
-    system('clear') || system('cls')
+  def reset_current_player
+    @current_player = (human.marker == P1_MARKER ? @human : @computer)
   end
 
   def play_tournament
@@ -284,34 +294,11 @@ class TTTGame
     human.score == goal_score || computer.score == goal_score
   end
 
-  def display_tournament_welcome
-    clear_screen
-    puts "Starting the Tic-Tac-Tournament!!!"
-    puts
-    display_goal_score
-    sleep 2
-  end
-
-  def display_goal_score
-    puts "The first player with #{goal_score} wins the tournament."
-  end
-
   def quit_tournament?
     puts "Press ENTER to continue"
     puts "'q' to quit the tournament."
     continue = gets.chomp
     continue.downcase == 'q'
-  end
-
-  def display_tournament_result
-    if human.score == goal_score
-      puts "Congrats! You are the first to #{goal_score} points!"
-      puts "YOU WIN THE TOURNAMENT!"
-    elsif computer.score == goal_score
-      puts "The computer is the first to #{goal_score} points."
-      puts "The computer won the tournament."
-    end
-    puts ""
   end
 
   def play_single_game
@@ -337,24 +324,44 @@ class TTTGame
   end
 
   def play_another_tournament?
-    answer = nil
-    loop do
-      puts "Would you like to play another Tic-Tac-Tournament? (y/n)"
-      answer = gets.chomp.downcase
-      break if %w(y n yes no).include? answer
-      puts "Sorry, anwer must be y or n."
-    end
-
+    puts "Would you like to play another Tic-Tac-Tournament? (y/n)"
+    answer = user_input_choice(%w(y n yes no))
     answer[0] == 'y'
   end
 
-  def set_up_new_game
-    board.clear
-    reset_current_player
+  def clear_screen_and_display_board
+    clear_screen
+    display_board
   end
 
-  def reset_current_player
-    @current_player = (human.marker == P1_MARKER ? @human : @computer)
+  def display_board
+    puts "You are #{human.marker}. Computer is #{computer.marker}."
+    puts ""
+    board.draw
+    puts ""
+  end
+
+  def display_tournament_welcome
+    clear_screen
+    puts "Starting the Tic-Tac-Tournament!!!"
+    puts
+    display_goal_score
+    sleep 2
+  end
+
+  def display_goal_score
+    puts "The first player with #{goal_score} wins the tournament."
+  end
+
+  def display_tournament_result
+    if human.score == goal_score
+      puts "Congrats! You are the first to #{goal_score} points!"
+      puts "YOU WIN THE TOURNAMENT!"
+    elsif computer.score == goal_score
+      puts "The computer is the first to #{goal_score} points."
+      puts "The computer won the tournament."
+    end
+    puts ""
   end
 
   def display_welcome_message
@@ -390,18 +397,6 @@ class TTTGame
 
   def display_goodbye_message
     puts "Thanks for playing Tic Tac Toe! Goodbye!"
-    puts ""
-  end
-
-  def clear_screen_and_display_board
-    clear_screen
-    display_board
-  end
-
-  def display_board
-    puts "You are #{human.marker}. Computer is #{computer.marker}."
-    puts ""
-    board.draw
     puts ""
   end
 
