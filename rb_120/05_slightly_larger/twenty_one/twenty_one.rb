@@ -89,7 +89,7 @@ class Hand
   end
 
   def total
-    aces_count = @hand.count { |card| card.rank == :Ace }
+    aces_count = @hand.count { |card| card.rank == :A }
     total = @hand.inject(0) { |sum, card| sum + card.value }
 
     while total > 21 && aces_count > 0
@@ -194,6 +194,7 @@ class Dealer < Player
   end
 
   def hit?
+    sleep 2
     hand.total <= 16
   end
 
@@ -213,15 +214,6 @@ class Game
     @current_player = human
   end
 
-  def play
-    display_welcome
-    deal_initial_cards
-    current_player_turn
-    next_player
-    current_player_turn unless human.busted?
-    display_result
-  end
-
   def clear_screen
     system('clear') || system('cls')
   end
@@ -231,11 +223,11 @@ class Game
     puts "*****************************"
     puts "*** Welcome to Twenty-One ***"
     puts "*****************************"
+    sleep 2
   end
 
   def next_player
     @current_player = dealer
-    dealer.flip_card if @current_player == dealer
   end
 
   def deal_initial_cards
@@ -252,41 +244,65 @@ class Game
     puts
   end
 
+  def clear_and_display_cards
+    clear_screen
+    display_cards
+  end
+
+  def play
+    display_welcome
+    deal_initial_cards
+    current_player_turn
+    next_player
+    current_player_turn unless human.busted?
+    display_result
+  end
+
   def current_player_turn
+    dealer.flip_card if @current_player == dealer
+
     loop do
-      clear_screen
-      display_cards
+      clear_and_display_cards
+      break if current_player.busted?
 
       if current_player.hit?
-        puts "#{current_player.name} chose to hit on #{current_player.score}"
-        sleep 1
-        card = deck.draw_card
-        puts "The card is: #{card}"
-        current_player << card
+        display_player_choice('hits')
         sleep 1.5
+        current_player << deck.draw_card
       else
-        puts "#{current_player.name} chose to stay on #{current_player.score}"
-        break
-        sleep 1.5
-      end
-
-      if current_player.busted?
-        puts "#{current_player.name.upcase} BUSTED!"
+        display_player_choice('stays')
         break
       end
     end
+    sleep 1.5
+  end
+
+  def display_player_choice(choice)
+    puts "#{current_player.name} #{choice} on #{current_player.score}"
+    puts
   end
 
   def display_result
-    display_cards
+    display_score
     display_winner
     puts
   end
 
+  def display_score
+    if human.busted?
+      puts "YOU BUSTED!"
+    elsif dealer.busted?
+      puts "DEALER BUSTED!"
+    else
+      puts "Dealer has #{dealer.score}."
+      puts "You have #{human.score}."
+    end
+  end
+
   def display_winner
-    if human.busted? || dealer > human
+    if human.busted? || (dealer > human && !dealer.busted?)
       puts "#{dealer.name} wins."
-    elsif dealer.busted? || human > dealer
+    elsif dealer.busted? || (human > dealer && !human.busted?)
       puts "#{human.name} won!"
     else
       puts "It's a push!"
