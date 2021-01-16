@@ -1,6 +1,40 @@
-require 'pry'
+module Inputable
+  def join_or(list, delim: ',', final: 'or')
+    return list[0].to_s if list.size == 1
+    return "#{list[0]} #{final} #{list[1]}" if list.size == 2
+
+    "#{list[0..-2].join(delim + ' ')}#{delim} #{final} #{list[-1]}"
+  end
+
+  def user_input_choice(choices)
+    answer = nil
+    loop do
+      answer = gets.chomp.downcase
+      break if choices.include?(answer)
+      puts "Please enter #{join_or(choices)}."
+    end
+
+    answer
+  end
+
+  def user_input_integer(range)
+    answer = nil
+    loop do
+      answer = gets.chomp
+      break if !answer.include?(".") && range.include?(answer.to_i)
+      puts "Please enter a number from #{range.first} to #{range.last}."
+    end
+
+    answer.to_i
+  end
+end
 
 class Board
+  def initialize
+    @squares = {}
+    clear
+  end
+
   def draw
     draw_row(1, 2, 3)
     draw_line
@@ -46,14 +80,6 @@ class Board
     nil
   end
 
-  def winning_move(marker)
-    imminent_game_over(marker, :==)
-  end
-
-  def blocking_move(marker)
-    imminent_game_over(marker, :!=)
-  end
-
   def find_single_empty_square(line)
     empty_key = nil
 
@@ -67,16 +93,26 @@ class Board
     empty_key
   end
 
+  def imminent_game_overs
+    imminent_game_overs = {}
+
+    WINNING_LINES.each do |line|
+      empty_square = find_single_empty_square(line)
+      next unless empty_square
+
+      imminent_winning_marker = line_winning_marker(line - [empty_square])
+      next unless imminent_winning_marker
+      imminent_game_overs[imminent_winning_marker] = empty_square
+    end
+
+    imminent_game_overs
+  end
+
   private
 
   WINNING_LINES = [[1, 2, 3], [4, 5, 6], [7, 8, 9],
                    [1, 4, 7], [2, 5, 8], [3, 6, 9],
                    [1, 5, 9], [3, 5, 7]]
-
-  def initialize
-    @squares = {}
-    clear
-  end
 
   def line_winning_marker(line)
     winning_marker = @squares[line[0]].marker
@@ -85,18 +121,6 @@ class Board
        line.all? { |key| @squares[key].marker == winning_marker }
       winning_marker
     end
-  end
-
-  def imminent_game_over(marker, comparison)
-    WINNING_LINES.each do |line|
-      empty_square = find_single_empty_square(line)
-      next unless empty_square
-
-      imminent_winning_marker = line_winning_marker(line - [empty_square])
-      return empty_square if imminent_winning_marker&.send(comparison, marker)
-    end
-
-    nil
   end
 
   def draw_row(a, b, c)
@@ -113,6 +137,10 @@ end
 class Square
   attr_accessor :marker
 
+  def initialize(marker = INITIAL_MARKER)
+    @marker = marker
+  end
+
   def unmarked?
     @marker == INITIAL_MARKER
   end
@@ -120,10 +148,6 @@ class Square
   private
 
   INITIAL_MARKER = ' '
-
-  def initialize(marker = INITIAL_MARKER)
-    @marker = marker
-  end
 
   def to_s
     @marker
@@ -133,6 +157,11 @@ end
 class Player
   attr_reader :marker, :score
 
+  def initialize(marker)
+    @marker = marker
+    reset_score
+  end
+
   def increment_score
     @score += 1
   end
@@ -140,16 +169,13 @@ class Player
   def reset_score
     @score = 0
   end
-
-  def initialize(marker)
-    @marker = marker
-    reset_score
-  end
 end
 
 class Human < Player
+  include Inputable
+
   def mark(board)
-    puts "Choose a square (#{TTTGame.join_or(board.unmarked_keys)}):"
+    puts "Choose a square (#{join_or(board.unmarked_keys)}):"
     square = nil
     loop do
       square = gets.chomp.to_i
@@ -163,8 +189,10 @@ end
 
 class Computer < Player
   def mark(board)
-    move = board.winning_move(marker)
-    move ||= board.blocking_move(marker)
+    imminent_game_overs = board.imminent_game_overs
+
+    move = imminent_game_overs[marker]
+    move ||= imminent_game_overs.values[0]
     move ||= regular_move(board)
 
     board[move] = marker
@@ -181,11 +209,10 @@ class Computer < Player
 end
 
 class TTTGame
-  def self.join_or(list, delim: ',', final: 'or')
-    return list[0].to_s if list.size == 1
-    return "#{list[0]} #{final} #{list[1]}" if list.size == 2
+  include Inputable
 
-    "#{list[0..-2].join(delim + ' ')}#{delim} #{final} #{list[-1]}"
+  def initialize
+    @board = Board.new
   end
 
   def play
@@ -207,34 +234,8 @@ class TTTGame
 
   attr_reader :board, :human, :computer, :current_player, :goal_score
 
-  def initialize
-    @board = Board.new
-  end
-
   def clear_screen
     system('clear') || system('cls')
-  end
-
-  def user_input_choice(choices)
-    answer = nil
-    loop do
-      answer = gets.chomp.downcase
-      break if choices.include?(answer)
-      puts "Please enter #{TTTGame.join_or(choices)}."
-    end
-
-    answer
-  end
-
-  def user_input_integer(range)
-    answer = nil
-    loop do
-      answer = gets.chomp
-      break if !answer.include?(".") && range.include?(answer.to_i)
-      puts "Please enter a number from #{range.first} to #{range.last}."
-    end
-
-    answer.to_i
   end
 
   def set_up_tournament
@@ -246,7 +247,7 @@ class TTTGame
   end
 
   def set_up_players
-    puts "Would you like to go first (x) or second (o)?"
+    puts "Would you like to be 'X' (goes first) or 'O' (goes second)?"
     answer = user_input_choice(['x', 'o'])
     case answer
     when 'x' then make_players(P1_MARKER, P2_MARKER)
