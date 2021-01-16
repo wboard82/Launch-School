@@ -104,11 +104,11 @@ class Hand
   end
 
   def display(hide_card: false)
-    if hide_card
-      split_cards = [hand.first.to_s.split("\n"), Card::BACK.split("\n")]
-    else
-      split_cards = hand.map { |card| card.to_s.split("\n") }
-    end
+    split_cards = if hide_card
+                    [hand.first.to_s.split("\n"), Card::BACK.split("\n")]
+                  else
+                    hand.map { |card| card.to_s.split("\n") }
+                  end
 
     0.upto(7) do |idx|
       puts split_cards.map { |card| card[idx] }.join("  ")
