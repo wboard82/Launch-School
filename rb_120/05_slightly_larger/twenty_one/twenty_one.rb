@@ -1,3 +1,4 @@
+require 'pry'
 =begin
 Design choices:
 - Separate out the "playing" aspects of the dealer from the "dealing" aspects
@@ -11,15 +12,15 @@ Design choices:
 class Card
   attr_reader :rank, :suit
 
-  BACK = """
-┌───────┐
-│░░░░░░░│
-│░░░░░░░│
-│░░░░░░░│
-│░░░░░░░│
-│░░░░░░░│
-└───────┘
-"""
+  BACK = <<~BACK_DOC
+    ┌───────┐
+    │░░░░░░░│
+    │░░░░░░░│
+    │░░░░░░░│
+    │░░░░░░░│
+    │░░░░░░░│
+    └───────┘
+  BACK_DOC
 
   def initialize(rank, suit)
     @rank = rank
@@ -44,15 +45,15 @@ class Card
   end
 
   def to_s
-    """
-┌───────┐
-|#{rank.to_s.ljust(7)}|
-|       |
-|#{symbol.center(7)}|
-|       |
-|#{rank.to_s.rjust(7)}|
-└───────┘
- """
+    <<~CARD
+      ┌───────┐
+      |#{rank.to_s.ljust(7)}|
+      |       |
+      |#{symbol.center(7)}|
+      |       |
+      |#{rank.to_s.rjust(7)}|
+      └───────┘
+    CARD
   end
 end
 
@@ -72,12 +73,6 @@ class Deck
 
   def draw_card
     @deck.pop
-  end
-
-  #!!! Delete this before submitting
-  def display_deck
-    puts "#{@deck.size} cards in the deck:"
-    @deck.each { |card| puts card }
   end
 end
 
@@ -116,7 +111,7 @@ class Hand
     end
 
     0.upto(7) do |idx|
-      puts split_cards.map{ |card| card[idx] }.join("  ")
+      puts split_cards.map { |card| card[idx] }.join("  ")
     end
   end
 end
@@ -264,17 +259,22 @@ class Game
     loop do
       clear_and_display_cards
       break if current_player.busted?
-
-      if current_player.hit?
-        display_player_choice('hits')
-        sleep 1.5
-        current_player << deck.draw_card
-      else
-        display_player_choice('stays')
-        break
-      end
+      break unless hit?
     end
+
     sleep 1.5
+  end
+
+  def hit?
+    if current_player.hit?
+      display_player_choice('hits')
+      sleep 1.5
+      current_player << deck.draw_card
+      true
+    else
+      display_player_choice('stays')
+      false
+    end
   end
 
   def display_player_choice(choice)
@@ -300,12 +300,18 @@ class Game
   end
 
   def display_winner
-    if human.busted? || (dealer > human && !dealer.busted?)
-      puts "#{dealer.name} wins."
-    elsif dealer.busted? || (human > dealer && !human.busted?)
-      puts "#{human.name} won!"
-    else
-      puts "It's a push!"
+    case winner
+    when human then puts "You won!"
+    when dealer then puts "Dealer wins!"
+    else puts "It's a push!"
+    end
+  end
+
+  def winner
+    if human.busted? then dealer
+    elsif dealer.busted? then human
+    elsif dealer > human then dealer
+    elsif dealer.busted? then human
     end
   end
 end
