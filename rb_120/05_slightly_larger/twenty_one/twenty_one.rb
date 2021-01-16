@@ -110,7 +110,7 @@ class Hand
                     hand.map { |card| card.to_s.split("\n") }
                   end
 
-    0.upto(7) do |idx|
+    0.upto(6) do |idx|
       puts split_cards.map { |card| card[idx] }.join("  ")
     end
   end
