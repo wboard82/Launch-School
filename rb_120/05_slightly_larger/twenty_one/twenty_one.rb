@@ -79,11 +79,11 @@ class Card
   def to_s
     <<~CARD
       ┌───────┐
-      |#{rank.to_s.ljust(7)}|
-      |       |
-      |#{symbol.center(7)}|
-      |       |
-      |#{rank.to_s.rjust(7)}|
+      │#{rank.to_s.ljust(7)}│
+      │       │
+      │#{symbol.center(7)}│
+      │       │
+      │#{rank.to_s.rjust(7)}│
       └───────┘
     CARD
   end
@@ -250,7 +250,7 @@ class Game
 
   def initialize
     @dealer = Dealer.new
-    @goal_score = 5
+    @goal_score = nil
   end
 
   def play
@@ -265,6 +265,16 @@ class Game
     display_welcome
     @human = Human.new(input_name)
     @current_player = human
+    puts
+    @goal_score = input_goal_score
+  end
+
+  def input_goal_score
+    low = 1
+    high = 9
+    puts "We will play until a player reaches #{low} to #{high} wins."
+    puts "How many wins would you like to play to?"
+    @goal_score = user_input_integer(low..high)
   end
 
   def input_name
@@ -286,6 +296,7 @@ class Game
       current_player_turn unless human.busted?
       display_result
       break if tournament_winner
+      press_any_key("Press a key to play the next game.")
     end
   end
 
@@ -377,7 +388,6 @@ class Game
     sleep 1
     display_tournament_score
     puts
-    press_any_key("Press a key to play the next game.")
   end
 
   def display_score
