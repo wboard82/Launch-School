@@ -376,46 +376,51 @@ class Game
   end
 
   def hit?
-    answer = false
-    if current_player.hit?
-      if current_player.hand_total == 21
-        puts "I can't let you do that, #{human.name}."
-        sleep 1
-        puts "Try reading the rules again."
-        sleep 1.5
-        puts "#{human.name} stays."
-      else
-        display_player_choice('hits')
-        current_player << deck.draw_card
-        answer = true
-      end
+    answer = current_player.hit?
+    if answer && current_player.hand_total == 21
+      hit_on_21
+      answer = false
+    elsif answer
+      display_player_choice('hits')
+      current_player << deck.draw_card
     else
       display_player_choice('stays')
     end
-    sleep 1.5
 
+    sleep 1.5
     answer
+  end
+
+  def hit_on_21
+    puts "I can't let you do that, #{human.name}."
+    sleep 1
+    puts "Try reading the rules again."
+    sleep 1.5
+    puts "#{human.name} stays."
   end
 
   def display_player_choice(choice)
     if current_player == human && choice == 'hits'
-      adverb = case human.hand_total
-               when (18..20) then ["insanely ", "crazily "].sample
-               when (15..17) then ["bravely ", "boldly "].sample
-               when (12..14) then ["smartly ", "wisely "].sample
-               when (4..11) then ["obviously ", "clearly "].sample
-               end
+      adverb = choose_adverb
     end
 
     puts "#{current_player.name} #{adverb}#{choice} on #{current_player.hand_total}"
     puts
   end
 
+  def choose_adverb
+    case human.hand_total
+    when (18..20) then ["insanely ", "crazily "].sample
+    when (15..17) then ["bravely ", "boldly "].sample
+    when (12..14) then ["smartly ", "wisely "].sample
+    when (4..11) then ["obviously ", "clearly "].sample
+    end
+  end
+
   def display_result(winner)
-    display_busted
     display_score
     display_winner(winner)
-    sleep 1
+    sleep 1.5
     display_tournament_score
     puts
   end
@@ -431,19 +436,18 @@ class Game
   end
 
   def display_score
-    unless human.busted? || dealer.busted?
+    unless display_busted
       puts "Dealer has #{dealer.hand_total}."
       puts "You have #{human.hand_total}."
     end
   end
 
   def display_winner(winner)
-    case winning_player
-    when human
-      puts "#{human.name} wins!"
-    when dealer then
-      puts "#{dealer.name} wins!"
-    else puts "It's a push!"
+    winner = winning_player
+    if winner
+      puts "#{winner.name} wins!"
+    else
+      puts "It's a push!"
     end
   end
 
