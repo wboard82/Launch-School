@@ -210,7 +210,7 @@ class Human < Player
   def hit?
     puts "You have #{hand_total}."
     puts "Would you like to (h)it or (s)tay?"
-    answer = user_input_choice(%w(h s hit stay))
+    answer = user_input_choice(%w(h s))
     answer[0] == 'h'
   end
 end
@@ -233,7 +233,7 @@ class Dealer < Player
   end
 
   def hit?
-    sleep 2
+    sleep 1.5
     hand.total <= 16
   end
 
@@ -291,10 +291,17 @@ class Game
   def play_tournament
     loop do
       initial_deal
-      current_player_turn
-      next_player
-      current_player_turn unless human.busted?
-      display_result
+      2.times do
+        clear_and_display_cards
+        current_player_turn
+        next_player
+        break if human.busted?
+      end
+      clear_and_display_cards
+
+      winner = winning_player
+      winner&.increment_score
+      display_result(winner)
       break if tournament_winner
       press_any_key("Press a key to play the next game.")
     end
@@ -326,7 +333,14 @@ class Game
   end
 
   def next_player
-    @current_player = dealer
+    case current_player
+    when human
+      dealer.show_card
+      @current_player = dealer
+    when dealer
+      dealer.hide_card
+      @current_player = human
+    end
   end
 
   def initial_deal
@@ -354,61 +368,81 @@ class Game
   end
 
   def current_player_turn
-    dealer.show_card if @current_player == dealer
-
     loop do
+      break unless hit?
       clear_and_display_cards
       break if current_player.busted?
-      break unless hit?
     end
-
-    sleep 1.5
   end
 
   def hit?
+    answer = false
     if current_player.hit?
-      display_player_choice('hits')
-      sleep 1.5
-      current_player << deck.draw_card
-      true
+      if current_player.hand_total == 21
+        puts "I can't let you do that, #{human.name}."
+        sleep 1
+        puts "Try reading the rules again."
+        sleep 1.5
+        puts "#{human.name} stays."
+      else
+        display_player_choice('hits')
+        current_player << deck.draw_card
+        answer = true
+      end
     else
       display_player_choice('stays')
-      false
     end
+    sleep 1.5
+
+    answer
   end
 
   def display_player_choice(choice)
-    puts "#{current_player.name} #{choice} on #{current_player.hand_total}"
+    if current_player == human && choice == 'hits'
+      adverb = case human.hand_total
+               when (18..20) then ["insanely ", "crazily "].sample
+               when (15..17) then ["bravely ", "boldly "].sample
+               when (12..14) then ["smartly ", "wisely "].sample
+               when (4..11) then ["obviously ", "clearly "].sample
+               end
+    end
+
+    puts "#{current_player.name} #{adverb}#{choice} on #{current_player.hand_total}"
     puts
   end
 
-  def display_result
+  def display_result(winner)
+    display_busted
     display_score
-    display_winner
+    display_winner(winner)
     sleep 1
     display_tournament_score
     puts
   end
 
-  def display_score
+  def display_busted
     if human.busted?
-      puts "YOU BUSTED!"
+      puts "#{human.name.upcase} BUSTED!"
+      true
     elsif dealer.busted?
-      puts "DEALER BUSTED!"
-    else
+      puts "#{dealer.name.upcase} BUSTED!"
+      true
+    end
+  end
+
+  def display_score
+    unless human.busted? || dealer.busted?
       puts "Dealer has #{dealer.hand_total}."
       puts "You have #{human.hand_total}."
     end
   end
 
-  def display_winner
-    case winner
+  def display_winner(winner)
+    case winning_player
     when human
-      human.increment_score #!!! don't like this here, but we'll move it later
-      puts "You won!"
+      puts "#{human.name} wins!"
     when dealer then
-      dealer.increment_score
-      puts "Dealer wins!"
+      puts "#{dealer.name} wins!"
     else puts "It's a push!"
     end
   end
@@ -424,7 +458,7 @@ class Game
     end
   end
 
-  def winner
+  def winning_player
     if human.busted? then dealer
     elsif dealer.busted? then human
     elsif dealer > human then dealer
