@@ -1,16 +1,42 @@
-require 'pry'
-=begin
-Design choices:
-- Separate out the "playing" aspects of the dealer from the "dealing" aspects
-- Hand is a separate class that each player has one of
-- Deck does not deal, the thing you can call on a Deck is to draw_card
-- Game is really the coordinator, takes care of the dealing and taking turns
-- This way the player and the deck are unaware of each other
--
+require 'pry' #!!!
 
-=end
+module Inputable
+  def join_or(list, delim: ',', final: 'or')
+    return list[0].to_s if list.size == 1
+    return "#{list[0]} #{final} #{list[1]}" if list.size == 2
+
+    "#{list[0..-2].join(delim + ' ')}#{delim} #{final} #{list[-1]}"
+  end
+
+  def user_input_choice(choices)
+    answer = nil
+    loop do
+      answer = gets.chomp.downcase
+      break if choices.include?(answer)
+      puts "Please enter #{join_or(choices)}."
+    end
+
+    answer
+  end
+
+  def user_input_integer(range)
+    answer = nil
+    loop do
+      answer = gets.chomp
+      break if !answer.include?(".") && range.include?(answer.to_i)
+      puts "Please enter a number from #{range.first} to #{range.last}."
+    end
+
+    answer.to_i
+  end
+end
+
 class Card
   attr_reader :rank, :suit
+
+  RANKS = [:A, :K, :Q, :J, 10, 9, 8, 7, 6, 5, 4, 3, 2]
+  SUITS = [:Hearts, :Diamonds, :Clubs, :Spades]
+
 
   BACK = <<~BACK_DOC
     ┌───────┐
@@ -58,13 +84,10 @@ class Card
 end
 
 class Deck
-  RANKS = [:A, :K, :Q, :J, 10, 9, 8, 7, 6, 5, 4, 3, 2]
-  SUITS = [:Hearts, :Diamonds, :Clubs, :Spades]
-
   def initialize
     @deck = []
-    RANKS.each do |rank|
-      SUITS.each do |suit|
+    Card::RANKS.each do |rank|
+      Card::SUITS.each do |suit|
         @deck << Card.new(rank, suit)
       end
     end
@@ -159,19 +182,16 @@ class Player
 end
 
 class Human < Player
-  def initialize
-    super("Human")
+  include Inputable
+
+  def initialize(name)
+    super
   end
 
   def hit?
     puts "You have #{score}."
     puts "Would you like to (h)it or (s)tay?"
-    answer = nil
-    loop do
-      answer = gets.chomp.downcase
-      break if %w(h s hit stay).include?(answer)
-      puts "Please enter 'h' or 's'."
-    end
+    answer = user_input_choice(%w(h s hit stay))
     answer[0] == 'h'
   end
 end
@@ -200,13 +220,55 @@ class Dealer < Player
 end
 
 class Game
+  include Inputable
+
   attr_reader :deck, :human, :dealer, :current_player
 
   def initialize
     @deck = Deck.new
-    @human = Human.new
+    @human = nil
     @dealer = Dealer.new
+  end
+
+  def play
+    display_welcome
+    @human = Human.new(input_name)
     @current_player = human
+
+    loop do
+      play_tournament
+      break unless play_another_tournament?
+    end
+  end
+
+  def input_name
+    name = nil
+    loop do
+      print "Please enter your name: "
+      name = gets.strip
+      break unless name.empty?
+      puts "Sorry, you must enter at least one letter or number."
+    end
+    name
+  end
+
+  def play_tournament
+    loop do
+      deal_initial_cards
+      current_player_turn
+      next_player
+      current_player_turn unless human.busted?
+      display_result
+      break if tournament_winner?
+    end
+  end
+
+  def tournament_winner?
+    true
+  end
+
+  def play_another_tournament?
+    false
   end
 
   def clear_screen
@@ -218,7 +280,8 @@ class Game
     puts "*****************************"
     puts "*** Welcome to Twenty-One ***"
     puts "*****************************"
-    sleep 2
+    puts
+    sleep 1
   end
 
   def next_player
@@ -242,15 +305,6 @@ class Game
   def clear_and_display_cards
     clear_screen
     display_cards
-  end
-
-  def play
-    display_welcome
-    deal_initial_cards
-    current_player_turn
-    next_player
-    current_player_turn unless human.busted?
-    display_result
   end
 
   def current_player_turn
@@ -311,7 +365,7 @@ class Game
     if human.busted? then dealer
     elsif dealer.busted? then human
     elsif dealer > human then dealer
-    elsif dealer.busted? then human
+    elsif human > dealer then human
     end
   end
 end
