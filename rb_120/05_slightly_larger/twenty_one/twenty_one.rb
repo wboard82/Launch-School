@@ -1,4 +1,5 @@
 require 'pry' #!!!
+require 'io/console'
 
 module Inputable
   def join_or(list, delim: ',', final: 'or')
@@ -17,6 +18,11 @@ module Inputable
     end
 
     answer
+  end
+
+  def press_any_key(prompt)
+    puts prompt
+    STDIN.getch
   end
 
   def user_input_integer(range)
@@ -140,11 +146,24 @@ class Hand
 end
 
 class Player
-  attr_reader :hand, :name
+  attr_reader :hand, :name, :score
 
   def initialize(name)
     @name = name
+    reset_score
+    new_hand
+  end
+
+  def reset_score
+    @score = 0
+  end
+
+  def new_hand
     @hand = Hand.new
+  end
+
+  def increment_score
+    @score += 1
   end
 
   def busted?
@@ -164,7 +183,7 @@ class Player
     hand.display
   end
 
-  def score
+  def hand_total
     hand.total
   end
 
@@ -189,7 +208,7 @@ class Human < Player
   end
 
   def hit?
-    puts "You have #{score}."
+    puts "You have #{hand_total}."
     puts "Would you like to (h)it or (s)tay?"
     answer = user_input_choice(%w(h s hit stay))
     answer[0] == 'h'
@@ -204,7 +223,12 @@ class Dealer < Player
     super("Dealer")
   end
 
-  def flip_card
+  def new_hand
+    @hide_card = true
+    super
+  end
+
+  def show_card
     @hide_card = false
   end
 
@@ -222,23 +246,25 @@ end
 class Game
   include Inputable
 
-  attr_reader :deck, :human, :dealer, :current_player
+  attr_reader :deck, :human, :dealer, :current_player, :goal_score
 
   def initialize
-    @deck = Deck.new
-    @human = nil
     @dealer = Dealer.new
+    @goal_score = 5
   end
 
   def play
-    display_welcome
-    @human = Human.new(input_name)
-    @current_player = human
-
+    set_up_game
     loop do
       play_tournament
       break unless play_another_tournament?
     end
+  end
+
+  def set_up_game
+    display_welcome
+    @human = Human.new(input_name)
+    @current_player = human
   end
 
   def input_name
@@ -254,17 +280,21 @@ class Game
 
   def play_tournament
     loop do
-      deal_initial_cards
+      initial_deal
       current_player_turn
       next_player
       current_player_turn unless human.busted?
       display_result
-      break if tournament_winner?
+      break if tournament_winner
     end
   end
 
-  def tournament_winner?
-    true
+  def tournament_winner
+    if human.score == goal_score
+      human
+    elsif dealer.score == goal_score
+      dealer
+    end
   end
 
   def play_another_tournament?
@@ -288,7 +318,12 @@ class Game
     @current_player = dealer
   end
 
-  def deal_initial_cards
+  def initial_deal
+    @deck = Deck.new
+    human.new_hand
+    dealer.new_hand
+    @current_player = human
+
     2.times do
       human << deck.draw_card
       dealer << deck.draw_card
@@ -308,7 +343,7 @@ class Game
   end
 
   def current_player_turn
-    dealer.flip_card if @current_player == dealer
+    dealer.show_card if @current_player == dealer
 
     loop do
       clear_and_display_cards
@@ -332,14 +367,17 @@ class Game
   end
 
   def display_player_choice(choice)
-    puts "#{current_player.name} #{choice} on #{current_player.score}"
+    puts "#{current_player.name} #{choice} on #{current_player.hand_total}"
     puts
   end
 
   def display_result
     display_score
     display_winner
+    sleep 1
+    display_tournament_score
     puts
+    press_any_key("Press a key to play the next game.")
   end
 
   def display_score
@@ -348,16 +386,31 @@ class Game
     elsif dealer.busted?
       puts "DEALER BUSTED!"
     else
-      puts "Dealer has #{dealer.score}."
-      puts "You have #{human.score}."
+      puts "Dealer has #{dealer.hand_total}."
+      puts "You have #{human.hand_total}."
     end
   end
 
   def display_winner
     case winner
-    when human then puts "You won!"
-    when dealer then puts "Dealer wins!"
+    when human
+      human.increment_score #!!! don't like this here, but we'll move it later
+      puts "You won!"
+    when dealer then
+      dealer.increment_score
+      puts "Dealer wins!"
     else puts "It's a push!"
+    end
+  end
+
+  def display_tournament_score
+    puts
+    puts "#{dealer.name} has #{dealer.score}, #{human.name} has #{human.score}."
+    tourney_winner = tournament_winner
+    if tourney_winner
+      puts "#{tourney_winner.name} won the tournament!"
+    else
+      puts "First player to #{goal_score} wins the tournament."
     end
   end
 
