@@ -1,5 +1,3 @@
-require 'pry' #!!!
-
 module Inputable
   require 'io/console'
 
@@ -33,8 +31,9 @@ module Inputable
   end
 
   def press_any_key(prompt)
-    puts prompt
+    print prompt
     STDIN.getch
+    puts
   end
 end
 
@@ -253,11 +252,48 @@ class Game
 
   attr_reader :deck, :human, :dealer, :current_player, :goal_score
 
+  RULES_1 = <<~RULES_DOC_1
+  * In twenty-one you are playing against the dealer.
+  * Each player (including the dealer) is dealt two cards.
+  * The goal is to get the score closest to 21 without going over.
+  * If you go over 21 you BUST and lose the game.
+
+  RULES_DOC_1
+
+  RULES_2 = <<~RULES_DOC_2
+  * Face cards are worth 10 points. Ace are 11 or 1.
+  * All others are worth the value printed on them.
+  * After the initial two cards are dealt, you can HIT (request another card).
+  * You can hit as many times as you want until you bust or decide to STAY.
+  * Once you stay it is the dealer's turn.
+
+  RULES_DOC_2
+
+  RULES_3 = <<~RULES_DOC_3
+  * The dealer must hit until it has a score of at least 17.
+  * The dealer must then stay. If the dealer busts, you win!
+  * If no one busts, the player with the highest score wins!
+
+  RULES_DOC_3
+
+  def clear_screen
+    system('clear') || system('cls')
+  end
+
+  def set_up_game
+    display_welcome
+    @human = Human.new(input_name)
+  end
+
   def set_up_tournament
     human.reset_score
     dealer.reset_score
     dealer.hide_card
     @current_player = human
+    puts
+    puts "Press 'r' to read the rules, or any other key to play"
+    answer = gets.chomp.downcase
+    display_rules if answer == 'r'
     @goal_score = input_goal_score
   end
 
@@ -311,44 +347,6 @@ class Game
     return dealer if dealer.score == goal_score
   end
 
-  def display_goodbye
-    clear_screen
-    puts
-    puts "**************************************************"
-    puts "***" + "Goodbye, #{human.name}".center(44) + "***"
-    puts "***" + "Thanks for playing Twenty-One!".center(44) + "***"
-    puts "**************************************************"
-  end
-
-  def set_up_game
-    display_welcome
-    @human = Human.new(input_name)
-  end
-
-  def input_goal_score
-    low = GOAL_SCORE_RANGE.first
-    high = GOAL_SCORE_RANGE.last
-    puts
-    puts "We will play until a player reaches #{low} to #{high} wins."
-    puts "How many wins would you like to play to?"
-    @goal_score = user_input_integer(low..high)
-  end
-
-  def input_name
-    name = nil
-    loop do
-      print "Please enter your name: "
-      name = gets.strip
-      break unless name.empty?
-      puts "Sorry, you must enter at least one letter or number."
-    end
-    name
-  end
-
-  def clear_screen
-    system('clear') || system('cls')
-  end
-
   def display_welcome
     clear_screen
     puts "*****************************"
@@ -358,13 +356,16 @@ class Game
     sleep 1
   end
 
-  def next_player
-    case current_player
-    when human
-      @current_player = dealer
-    when dealer
-      @current_player = human
-    end
+  def display_rules
+    clear_screen
+    puts RULES_1
+    press_any_key("Press a key")
+    clear_screen
+    puts RULES_2
+    press_any_key("Press a key")
+    clear_screen
+    puts RULES_3
+    press_any_key("Those are the rules. Press any key to play...")
   end
 
   def display_cards
@@ -379,38 +380,6 @@ class Game
     display_cards
   end
 
-  def current_player_turn
-    loop do
-      break unless hit?
-      clear_and_display_cards
-      break if current_player.busted?
-    end
-  end
-
-  def hit? # rubocop:disable Metrics/MethodLength
-    answer = current_player.hit?
-    if answer && current_player.hand_total == 21
-      hit_on_21
-      answer = false
-    elsif answer
-      display_player_choice('hits')
-      current_player << deck.draw_card
-    else
-      display_player_choice('stays')
-    end
-
-    sleep 1.5
-    answer
-  end
-
-  def hit_on_21
-    puts "I can't let you do that, #{human.name}."
-    sleep 1
-    puts "Try reading the rules again."
-    sleep 1.5
-    puts "#{human.name} stays."
-  end
-
   def display_player_choice(choice)
     if current_player == human && choice == 'hits'
       adverb = choose_adverb
@@ -423,10 +392,9 @@ class Game
 
   def choose_adverb
     case human.hand_total
-    when (18..20) then ["insanely ", "crazily "].sample
-    when (15..17) then ["bravely ", "boldly "].sample
-    when (12..14) then ["smartly ", "wisely "].sample
-    when (4..11) then ["obviously ", "clearly "].sample
+    when (LIMIT - 3..LIMIT - 1) then ["insanely ", "crazily "].sample
+    when (LIMIT - 6..LIMIT - 4) then ["bravely ", "boldly "].sample
+    when (0..LIMIT - 7) then ["smartly ", "wisely "].sample
     end
   end
 
@@ -472,6 +440,77 @@ class Game
     else
       puts "First player to #{goal_score} wins the tournament."
     end
+  end
+
+  def display_goodbye
+    clear_screen
+    puts
+    puts "**************************************************"
+    puts "***" + "Goodbye, #{human.name}".center(44) + "***"
+    puts "***" + "Thanks for playing Twenty-One!".center(44) + "***"
+    puts "**************************************************"
+    puts
+  end
+
+  def input_goal_score
+    low = GOAL_SCORE_RANGE.first
+    high = GOAL_SCORE_RANGE.last
+    puts
+    puts "We will play until a player reaches #{low} to #{high} wins."
+    puts "How many wins would you like to play to?"
+    @goal_score = user_input_integer(low..high)
+  end
+
+  def input_name
+    name = nil
+    loop do
+      print "Please enter your name: "
+      name = gets.strip
+      break unless name.empty?
+      puts "Sorry, you must enter at least one letter or number."
+    end
+    name
+  end
+
+  def next_player
+    case current_player
+    when human
+      @current_player = dealer
+    when dealer
+      @current_player = human
+    end
+  end
+
+  def current_player_turn
+    loop do
+      break unless hit?
+      clear_and_display_cards
+      break if current_player.busted?
+    end
+  end
+
+  def hit? # rubocop:disable Metrics/MethodLength
+    answer = current_player.hit?
+    if answer && current_player.hand_total == LIMIT
+      hit_on_limit
+      answer = false
+    elsif answer
+      display_player_choice('hits')
+      current_player << deck.draw_card
+    else
+      display_player_choice('stays')
+    end
+
+    sleep 1.5
+    answer
+  end
+
+  def hit_on_limit
+    puts "I can't let you do that, #{human.name}."
+    sleep 1.5
+    puts "Try reading the rules again."
+    sleep 1.5
+    puts "#{human.name} stays."
   end
 
   def winning_player
