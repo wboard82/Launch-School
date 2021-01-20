@@ -1,7 +1,8 @@
 require 'pry' #!!!
-require 'io/console'
 
 module Inputable
+  require 'io/console'
+
   def join_or(list, delim: ',', final: 'or')
     return list[0].to_s if list.size == 1
     return "#{list[0]} #{final} #{list[1]}" if list.size == 2
@@ -20,11 +21,6 @@ module Inputable
     answer
   end
 
-  def press_any_key(prompt)
-    puts prompt
-    STDIN.getch
-  end
-
   def user_input_integer(range)
     answer = nil
     loop do
@@ -35,6 +31,11 @@ module Inputable
 
     answer.to_i
   end
+
+  def press_any_key(prompt)
+    puts prompt
+    STDIN.getch
+  end
 end
 
 class Card
@@ -42,7 +43,6 @@ class Card
 
   RANKS = [:A, :K, :Q, :J, 10, 9, 8, 7, 6, 5, 4, 3, 2]
   SUITS = [:Hearts, :Diamonds, :Clubs, :Spades]
-
 
   BACK = <<~BACK_DOC
     ┌───────┐
@@ -59,23 +59,6 @@ class Card
     @suit = suit
   end
 
-  def value
-    case rank
-    when :A then 11
-    when :K, :Q, :J then 10
-    else rank
-    end
-  end
-
-  def symbol
-    case suit
-    when :Spades then '♠'
-    when :Diamonds then '♦'
-    when :Hearts then '♥'
-    when :Clubs then '♣'
-    end
-  end
-
   def to_s
     <<~CARD
       ┌───────┐
@@ -86,6 +69,25 @@ class Card
       │#{rank.to_s.rjust(7)}│
       └───────┘
     CARD
+  end
+
+  def value
+    case rank
+    when :A then 11
+    when :K, :Q, :J then 10
+    else rank
+    end
+  end
+
+  private
+
+  def symbol
+    case suit
+    when :Spades then '♠'
+    when :Diamonds then '♦'
+    when :Hearts then '♥'
+    when :Clubs then '♣'
+    end
   end
 end
 
@@ -116,7 +118,7 @@ class Hand
     aces_count = @hand.count { |card| card.rank == :A }
     total = @hand.inject(0) { |sum, card| sum + card.value }
 
-    while total > 21 && aces_count > 0
+    while total > Game::LIMIT && aces_count > 0
       total -= 10
       aces_count -= 1
     end
@@ -126,10 +128,6 @@ class Hand
 
   def <<(card)
     @hand << card
-  end
-
-  def list_cards
-    @hand.map(&:to_s)
   end
 
   def display(hide_card: false)
@@ -170,14 +168,6 @@ class Player
     hand.total > 21
   end
 
-  def take_turn
-    loop do
-      answer = decide
-      hit if answer == 'h'
-      break if answer == 's'
-    end
-  end
-
   def display_hand
     puts "#{name} has:"
     hand.display
@@ -203,10 +193,6 @@ end
 class Human < Player
   include Inputable
 
-  def initialize(name)
-    super
-  end
-
   def hit?
     puts "You have #{hand_total}."
     puts "Would you like to (h)it or (s)tay?"
@@ -216,20 +202,19 @@ class Human < Player
 end
 
 class Dealer < Player
-  attr_reader :hide_card
-
-  def initialize
-    @hide_card = true
-    super("Dealer")
-  end
+  attr_reader :hide
 
   def new_hand
-    @hide_card = true
+    @hide = true
     super
   end
 
   def show_card
-    @hide_card = false
+    @hide = false
+  end
+
+  def hide_card
+    @hide = true
   end
 
   def hit?
@@ -239,39 +224,111 @@ class Dealer < Player
 
   def display_hand
     puts "#{name} has:"
-    hand.display(hide_card: hide_card)
+    hand.display(hide_card: hide)
   end
 end
 
 class Game
   include Inputable
 
-  attr_reader :deck, :human, :dealer, :current_player, :goal_score
+  LIMIT = 21
+  GOAL_SCORE_RANGE = (1..9)
 
   def initialize
-    @dealer = Dealer.new
+    @dealer = Dealer.new("Dealer")
     @goal_score = nil
   end
 
   def play
     set_up_game
     loop do
+      set_up_tournament
       play_tournament
       break unless play_another_tournament?
     end
+    display_goodbye
+  end
+
+  private
+
+  attr_reader :deck, :human, :dealer, :current_player, :goal_score
+
+  def set_up_tournament
+    human.reset_score
+    dealer.reset_score
+    dealer.hide_card
+    @current_player = human
+    @goal_score = input_goal_score
+  end
+
+  def play_tournament
+    loop do
+      initial_deal
+      play_hand
+      end_of_hand
+      break if tournament_winner
+      press_any_key("Press a key to play the next game.")
+    end
+  end
+
+  def play_another_tournament?
+    puts "Would you like to play another tournament? (y/n)"
+    answer = user_input_choice(['y', 'n'])
+    answer == 'y'
+  end
+
+  def initial_deal
+    @deck = Deck.new
+    human.new_hand
+    dealer.new_hand
+    @current_player = human
+
+    2.times do
+      human << deck.draw_card
+      dealer << deck.draw_card
+    end
+  end
+
+  def play_hand
+    2.times do
+      clear_and_display_cards
+      current_player_turn
+      next_player
+      dealer.show_card
+      break if human.busted?
+    end
+  end
+
+  def end_of_hand
+    clear_and_display_cards
+    winner = winning_player
+    winner&.increment_score
+    display_result
+  end
+
+  def tournament_winner
+    return human if human.score == goal_score
+    return dealer if dealer.score == goal_score
+  end
+
+  def display_goodbye
+    clear_screen
+    puts
+    puts "**************************************************"
+    puts "***" + "Goodbye, #{human.name}".center(44) + "***"
+    puts "***" + "Thanks for playing Twenty-One!".center(44) + "***"
+    puts "**************************************************"
   end
 
   def set_up_game
     display_welcome
     @human = Human.new(input_name)
-    @current_player = human
-    puts
-    @goal_score = input_goal_score
   end
 
   def input_goal_score
-    low = 1
-    high = 9
+    low = GOAL_SCORE_RANGE.first
+    high = GOAL_SCORE_RANGE.last
+    puts
     puts "We will play until a player reaches #{low} to #{high} wins."
     puts "How many wins would you like to play to?"
     @goal_score = user_input_integer(low..high)
@@ -286,37 +343,6 @@ class Game
       puts "Sorry, you must enter at least one letter or number."
     end
     name
-  end
-
-  def play_tournament
-    loop do
-      initial_deal
-      2.times do
-        clear_and_display_cards
-        current_player_turn
-        next_player
-        break if human.busted?
-      end
-      clear_and_display_cards
-
-      winner = winning_player
-      winner&.increment_score
-      display_result(winner)
-      break if tournament_winner
-      press_any_key("Press a key to play the next game.")
-    end
-  end
-
-  def tournament_winner
-    if human.score == goal_score
-      human
-    elsif dealer.score == goal_score
-      dealer
-    end
-  end
-
-  def play_another_tournament?
-    false
   end
 
   def clear_screen
@@ -335,23 +361,9 @@ class Game
   def next_player
     case current_player
     when human
-      dealer.show_card
       @current_player = dealer
     when dealer
-      dealer.hide_card
       @current_player = human
-    end
-  end
-
-  def initial_deal
-    @deck = Deck.new
-    human.new_hand
-    dealer.new_hand
-    @current_player = human
-
-    2.times do
-      human << deck.draw_card
-      dealer << deck.draw_card
     end
   end
 
@@ -375,7 +387,7 @@ class Game
     end
   end
 
-  def hit?
+  def hit? # rubocop:disable Metrics/MethodLength
     answer = current_player.hit?
     if answer && current_player.hand_total == 21
       hit_on_21
@@ -404,7 +416,8 @@ class Game
       adverb = choose_adverb
     end
 
-    puts "#{current_player.name} #{adverb}#{choice} on #{current_player.hand_total}"
+    print "#{current_player.name} #{adverb}#{choice}"
+    puts " on #{current_player.hand_total}"
     puts
   end
 
@@ -417,9 +430,9 @@ class Game
     end
   end
 
-  def display_result(winner)
+  def display_result
     display_score
-    display_winner(winner)
+    display_winner
     sleep 1.5
     display_tournament_score
     puts
@@ -436,13 +449,12 @@ class Game
   end
 
   def display_score
-    unless display_busted
-      puts "Dealer has #{dealer.hand_total}."
-      puts "You have #{human.hand_total}."
-    end
+    return if display_busted
+    puts "Dealer has #{dealer.hand_total}."
+    puts "You have #{human.hand_total}."
   end
 
-  def display_winner(winner)
+  def display_winner
     winner = winning_player
     if winner
       puts "#{winner.name} wins!"
