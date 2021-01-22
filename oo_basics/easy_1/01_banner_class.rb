@@ -47,4 +47,4 @@ puts banner
 =end
 
 
-#continue do the further exploration
+#Study continue do the further exploration
