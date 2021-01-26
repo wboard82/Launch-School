@@ -66,6 +66,8 @@ class Rank
     end
   end
 
+  alias_method :==, :eql?
+
   def to_s
     case rank
     when :J then "J"
@@ -268,11 +270,7 @@ class PokerHand < Hand
     rank_comp = HAND_RANKINGS[evaluation] <=> HAND_RANKINGS[other.evaluation]
     return rank_comp unless rank_comp == 0
 
-    if straight?
-      straight_high_card <=> other.straight_high_card
-    else
-      progressive_compare(other)
-    end
+    progressive_compare(other)
   end
 
   protected
