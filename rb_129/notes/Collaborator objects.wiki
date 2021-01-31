@@ -1,0 +1,46 @@
+= Collaborator Objects =
+
+A collaborator object is an object that is referenced by an instance variable
+from within another class. This collaborator object is part of the state of the
+object that references it. Often, instance variables within a class refer to
+objects of builtin classes such as String or Integer. These are technically
+collaborator objects, however, the term is often reserved for custom classes
+that are defined within our program.
+
+{{{ruby
+class Pantry
+  def intitalize
+    @food_items = []
+  end
+  
+  def stock(item)
+    @food_items << item
+  end
+  
+  def fetch(item)
+    @food_items.fetch(item)
+  end
+end
+
+class FoodItem
+  def initialize(name, amount)
+    @name = name
+    @amount = amount
+  end
+end
+
+class Cook
+  def initialize(pantry)
+    @pantry = pantry
+  end
+  
+  def fetch_ingredient(ingredient)
+    @pantry.item(ingredient)
+  end
+  
+  def stock_pantry(ingredient)
+    @pantry.stock(ingredient)
+  end
+end
+    
+}}}

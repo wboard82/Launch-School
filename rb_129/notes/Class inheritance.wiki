@@ -1,0 +1,51 @@
+= Class Inheritance =
+
+In Object Oriented Programming, inheritance is the ability of classes to inherit
+attributes and behaviors from other classes. This allows programmers to define a
+more minimal super-class which can be more frequently reused and then define
+subclasses which inherit the behaviors and attributes of the superclass while
+adding behaviors specific to that subclass (or sometimes replacing or changing
+behavior of the super class.)
+
+A classic example of this would be an `Animal` class.
+
+{{{ruby
+class Animal
+  def initialize(weight, color)
+    @weight = weight
+    @color = color
+  end
+  
+  def move
+    "I'm moving by "
+  end
+end
+
+class Turtle
+  def initialize(weight, color)
+    super
+    @in_shell = true
+  end
+  
+  def move
+    "#{super} crawling."
+  end
+  
+  def hide_in_shell
+    @in_shell = true
+  end
+  
+  def come_out_of_shell
+    @in_shell = false
+  end
+end
+
+class Rabbit
+  def initialize(weight, color)
+    super
+  end
+  
+  def move
+    "#{super} hopping."
+  end
+end

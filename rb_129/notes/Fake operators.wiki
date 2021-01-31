@@ -1,0 +1,41 @@
+= Fake Operators =
+
+In many programming languages, operators such as `+`, `-`, `==`, and others are
+specially defined by the language and are not method calls. In Ruby most of
+these are actually method calls that just appear to be operators because Ruby
+provides syntactic sugar. This means that these operators can be defined and
+overridden in programmer-defined classes. A programmer can define whatever
+operators they would like in a way that makes sense to the class itself.
+
+For instance, the `+` operator is really a call to the `#+` method in whatever
+class the method is called on:
+
+{{{ruby
+a = 1     # a is an Integer
+a + 1     # this is equivalent to:
+a.+(1)    # this is a call to the Integer#+ method
+}}}
+
+Here is an example of overriding the method for a custom class:
+
+{{{ruby
+class Person
+  attr_reader :age
+  
+  def initialize(age)
+    @age = age
+  end
+
+  def ==(other)
+    age == other.age
+  end
+end
+}}}
+
+In this case, we have overriden the `==` method defined in BasicObject. This
+will be the `==` method that any object gets by defaul through inheritance. In
+BasicObject it is defined to compare the object IDs of the two objects. However,
+since we want to compare our Person objects by their age attributes, we can
+define the `==` method in our class. Here, we actually end up relying on the
+`Integer#==` method to compare the two ages. Incidentally, when we define the
+`==` method, Ruby will automatically define the `!=` method as well.

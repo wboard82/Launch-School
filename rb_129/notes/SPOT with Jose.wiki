@@ -1,0 +1,17 @@
+= Spot Study Session with Jose =
+
+== Encapsulation ==
+
+* In Ruby we accomplish encapsulation by hiding state within **objects**
+* Specify that objects are instances of a class
+* CLASSES and MODULES are also OBJECTS
+* Example for polymorphism: to_s method
+* Class relationships are is a relationship.
+* Module/Interface relationships are "has a" relationships.
+* Inheritance/Interface/Collaborator:
+    * when X is a Y, then X should subclass Y
+    * when X has a Y, then X should have a collaborator object Y
+    * when X can do Y or has ability to Y, then X should mixin Y (unless a
+      superclass already implements that ability.
+
+

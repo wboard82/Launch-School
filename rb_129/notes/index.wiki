@@ -1,0 +1,46 @@
+= RB129 =
+
+== To-Do ==
+  * [ ] Be able to define these concepts:
+      * [ ] Class
+      * [ ] Object
+      * [ ] [[Class inheritance]]
+      * [ ] Encapsulation
+      * [ ] Polymorphism
+          * [ ] Modules
+          * [ ] Duck typing
+          * [ ] Inheritance
+      * [ ] [[Lookup path]]
+      * [ ] [[Fake operators]]
+      * [ ] [[Collaborator objects]]
+      * [ ] Equality
+      * [ ] Duck typing
+
+== Study Questions ==
+* [[From Quiz 1]]
+* [[From Quiz 2]]
+* [[From Quiz 3]]
+* [[From Quiz 4]]
+
+== Study Sessions ==
+* [[SPOT with Jose]]
+
+== [[Definitions]] ==
+
+==Written Study Guide==
+* [ ] [[Classes and objects]]
+* [ ] Use attr_* to create setter and getter methods
+* [ ] How to call [[setters and getters]]
+* [ ] Instance methods vs. class methods
+* [ ] Method Access Control
+* [ ] Referencing and setting instance variables vs. using getters and setters
+* [ ] Class inheritance, [[encapsulation]], and [[polymorphism]]
+* [ ] Modules
+* [ ] Method lookup path
+* [ ] self
+* [ ] Calling methods with self
+* [ ] More about self
+* [ ] Reading OO code
+* [ ] Fake operators and equality
+* [ ] Truthiness
+* [ ] Working with collaborator objects

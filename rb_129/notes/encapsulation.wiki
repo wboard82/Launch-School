@@ -1,0 +1,47 @@
+=Encapsulation=
+
+==Encapsulation notes from reading==
+
+* It is a form of _data protection_ so that data cannot be manipulated without
+  obvious intent.
+* It allows programmers to think at a new level of abstraction. (They are able
+  to think of interacting with a real-world object rather than always thinking
+  at the base level of the code.)
+
+==Encapsulation in general==
+
+Encapsulation in software engineering is the practice of hiding implementation
+details within self-contained units of code. These units interact with the rest
+of the software through a specified set of methods, often called an interface.
+The rest of the behavior and state of the encapsulated code is unknown to the
+rest of the program.
+
+The benefit of encapsulation is that it can make large programs easier to reason
+about and debug. Because interactions between sections of code is limited to
+certain methods, changes can be made within an encapsulated chunk of code
+without worrying that it will cause disruption to the rest of the code base. As
+long as the behavior remains the same from the perspective of the public
+interface, the implementation doesn't matter to the rest of the code that any
+given section is interacting with.
+
+Another benefit is that encapsulation can make it easier for code to be reused.
+Having well-defined segments of code that perform a well-defined set of tasks,
+allows for that segment to be placed into contexts other than those for which it
+was originally written. This is much more difficult to do if code is not
+encapsulated well.
+
+==Encapsulation in Ruby==
+
+In Ruby, code can be encapsulated in several ways. Probably the most notable in
+Ruby is the Class. A class defines the behvior of the objects which are
+instances of that class. The class defines public and private methods that act
+upon the data stored within instance variables, as well as interact with other
+objects. Encapsulation is achieved by access control. Instance variables which
+encode the attributes of an object are only accessible through getter and setter
+methods if they are defined for that variable.
+
+Encapsulation can also be achieved through Modules. A module defines a set of
+behaviors that can be mixed in with any class (sometimes with certain provisos
+of what methods the class must implement.) A module is a way of encapsulating
+behavior that might be useful to several different classes.
+

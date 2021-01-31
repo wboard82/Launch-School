@@ -1,0 +1,198 @@
+= Definitions and Code Examples =
+
+Classes and objects::
+:: A class is essentially a "mold" for creating objects. Objects can be instantiated from a class and they will receive all of the methods that are defined in the class. A class defines the names for instance variables and how they can be accessed and interacted with, but it is not until an object is instantiated from that class (and appropriate methods invoked) that these instance variables are initialized.
+
+Use attr_* to create setter and getter methods::
+:: Within a class we can create getter and setter methods to provide access to instance variables. One way to do this is by writing out these two methods:
+{{{ruby
+class MyClass
+  def initialize(my_var)
+    @my_var = my_car
+  end
+  
+  def my_var            # getter method
+    @my_var             # returns the object referenced by @my_var
+  end
+  
+  def my_var=(new_val)  # setter method
+    @my_var = new_val   # sets the value of @my_var to the argument
+  end
+end
+
+my_obj = MyClass.new(5)
+my_obj.my_var           # => 5
+my_obj.my_var = 6       # => sets @my_var to 6 in my_obj
+my_obj.my_var           # => 6
+}}}
+:: However, Ruby provides three ways of setting these methods in a shorthand way:
+{{{ruby
+attr_reader :my_var     # creates a getter method just like above
+attr_writer :my_var     # creates a setter method just like above
+attr_accessor :my_var   # creates both
+}}}
+:: This saves time and space and can make a program more readable. You may also list several variable names and Ruby will create the appropriate methods for each one.
+
+:: It is important to note that these methods do *not* initialize the variable.  They simply create the method to access an instance variable of that name. If it has not been initialized, the getter methods will return `nil`.
+
+How to call setters and getters::
+:: see above
+
+Instance methods vs. class methods::
+:: An instance can be called on any instance of the class. Although it is defined in the class (or module), the instance method cannot be called on the class. Instead, when an instance of the class is instantiated, the object gets its own copy of that method that can be called on it.
+
+:: A class method, on the other hand, can only be called on the class itself.  Instances of the class cannot call the method internally without calling the method on the class.
+{{{ruby
+class Cat
+  @@num_of_cats = 0
+  
+  def self.num_of_cats
+    @@num_of_cats
+  end
+  
+  def initialize
+    @@num_of_cats += 1
+  end
+  
+  def talk
+    puts "Meow!"
+  end
+end
+
+Cat.num_of_cats     # => 0
+cat = Cat.new
+Cat.num_of_cats     # => 1
+cat.num_of_cats     # => NoMethodError (cannot call class method on instance of class)
+Cat.talk            # => NoMethodError (cannot call instance method on class)
+cat.talk            # => "Meow!"
+}}}
+
+Method Access Control::
+:: Ruby gives three keywords to control where in your code instance methods may be accessed: `private`, `public`, and `protected`. When defining a class, instance methods are `public` by default. Any public method may be called on an object from anywhere in the code base. All of the public methods make up the public interface of the object.
+
+:: Using the `private` keyword before a method makes it so that the method may only be called from within the object's scope. These are often methods that help the object perform a behavior, but which the author does not want to expose to any other objects.
+
+:: The `protected` keyword offers a middle ground. For objects of the same class, these methods appear to be public. This means that an object of the same class may call the method on another object. However, to objects outside of the object's class, the method will act as if it is private and will deny access.
+
+:: `protected` methods are often used for custom comparison operators where you may want to be able to compare two objects of the same class based on some attribute that you would like to keep hidden from the rest of the code base.
+{{{ruby
+class SecretNumber
+  def initialize
+    new_secret_num
+  end
+
+  def >(other)
+    num > other.num
+  end
+
+  def reset
+    new_secret_num
+  end
+
+  protected
+  attr_reader :num
+
+  private
+  def new_secret_num
+    @num = rand(10)
+  end
+end
+
+num1 = SecretNumber.new
+num2 = SecretNumber.new
+5.times do
+  if num1 > num2
+    puts "Num1 is bigger!"
+  elsif num2 > num1
+    puts "Num2 is bigger!"
+  else puts "They're equal."
+  end
+  puts "--- Resetting numbers ---"
+  num1.reset
+  num2.reset
+end
+
+num1.num    # => error - trying to access private method
+}}}
+:: In the above code we have two public instance methods: `>` and `reset`. These can be called on an instance of the class from anywhere in the program. We see this within the look defined by the `times` method and the `do...end` block where we call both the `>` method and `reset` on each of the objects.
+
+:: Within the `>` method definition, we call `num` on another `SecretNumber` object. This is possible since this is called from an object of the same class and the `num` method (defined by the `attr_reader`) is designated as `protected`. As you can see we do not have access to the same method outside the class. (Our last line would throw an error.) The `protected` method allows us to create comparison methods such as `>` where we need access to the state of another object without exposing that state everywhere. Indeed, our secret number wouldn't be so secret if that method call on the last line could work.
+
+:: Finally, we also have a private method `new_secret_num` that is used internally by the class to generate a new random number. This example is a bit contrived, but it demonstrates how `private` methods often work - to perform a task for the class that you do not want to expose to the outside world.
+
+Referencing and setting instance variables vs. using getters and setters::
+:: When a class has defined getters and setters for an instance variable, we have two ways of referencing or setting those variables. We can do it through the getters/setters or we can reference the instance variable directly by using the `@` symbol.
+
+:: Sometimes the getters and setters can be defined to add some sort of extra functionality such as validating the value that a variable is being set to, or obscuring the output (i.e. only exposing the last four digits of a credit card number.) In these cases, the getters and setters are safer to use.
+
+:: When the getters and setters are defined by `attr_*` then they are largely equivalent to accessing the variable directly, other than one is a method call and the other is simply a variable reference or reassignment.
+
+:: One thing to be careful of is that if we are accessing a setter method within the class, we must use the `self` keyword. Otherwise Ruby will try to initialize a new local variable and not realize that we are trying to make a method call.
+{{{ruby
+class Customer
+  class InvalidCardNumError < RuntimeError; end
+
+  def initialize(name, card_num)
+    @name = name                # directly setting the instance variable
+    self.card_num = card_num    # setting using a setter
+  end
+
+  def to_s
+    "Customer #{@name}'s is using a #{card_num}."
+  end
+
+  # This getter method obscures all but the last four digits of the card number.
+  # We should use this getter instead of referencing the raw variable directly
+  def card_num
+    "card ending in: #{@card_num[-4, 4]}"
+  end
+
+  # This setter ensures that the number we pass in is a valid card number (16
+  # digits long in this example - although a real check would need more than this.)
+  def card_num=(card_num)
+    card_num = card_num.delete('-')
+    raise InvalidCardNumError if card_num.size != 16
+    @card_num = card_num
+  end
+end
+
+cindy = Customer.new('Cindy', "4567-1234-5678-9999")
+puts cindy
+john = Customer.new('John', "1234") # => throws an error
+}}}
+
+Class inheritance::
+:: 
+
+Encapsulation::
+::
+
+Polymorphism::
+:: 
+
+Modules::
+:: 
+
+Method lookup path::
+:: 
+
+self::
+:: 
+
+Calling methods with self::
+:: 
+
+More about self::
+:: 
+
+Reading OO code::
+:: 
+
+Fake operators and equality::
+:: 
+
+Truthiness::
+:: 
+
+Working with collaborator objects::
+:: 

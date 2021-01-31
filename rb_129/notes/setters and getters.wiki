@@ -1,0 +1,71 @@
+= Setters and Getters =
+
+== Definition ==
+
+Setters and getters are instance methods that have the purpose of updating or
+returning the ojects referenced by instance variables. They can be defined in
+two main ways, using attr_* or by defining instance methods with the variable
+name.
+
+{{{ruby
+class TestClass
+  attr_accessor :var_1  # this automatically creates a setter and getter
+  attr_reader :var_read # this automatically creates a getter
+  attr_writer :var_write # this automatically creates a setter
+  
+  def initalize
+    @var_1 = 0
+    @var_read = 'read'
+    @var_write = 'write'
+    @var_2 = 2
+  end
+  
+  def var_2
+    @test_var_2
+  end
+  
+  def var_2=(new_value)
+    @test_var_2 = new_value
+  end
+end
+
+tester = TestClass.new
+tester.var_1            # => 0
+tester.var_1 = 5
+tester.var_1            # => 5
+tester.var_read         # => 'read'
+tester.var_read = "hi"  # will throw an error, method not defined
+tester.var_write        # will throw an error, method not defined
+tester.var_write = "hi" # will set @var_write to "hi"
+tester.var_2            # => 2
+tester.var_2 = 5        # => 5
+}}}
+
+== Referencing and Setting Instance Variables vs. Using Getters & Setters ==
+
+From outside a class, the only way to reference instance variables is by using
+their getters and setters, if they have been defined. This is Ruby's way of
+controlling access to these instance variables. (Encapsulation.) However, within
+a class, instance variables are always available by using the @var_name syntax.
+
+Let's say I have the above example and I wanted to add another method that uses
+values from the instance variables. If there is a getter defined for the
+variable, I can use that within my class:
+
+{{{ruby
+def TestClass
+  #...omitted code from above...
+  
+  def method
+    puts "#{var_1} and #{var_reader} can be accessed without the '@' symbol. These are method calls."
+    puts "#{@var_writer} must have the '@' symbol since there is no getter method defined."
+    self.var_writer = "I have to prepend 'self' onto my setter methods."
+    puts @var_writer
+    puts "Otherwise Ruby thinks I am declaring a new local variable, instead of calling a setter method."
+    @var_2 = 6
+    puts "I can also set an instance variable with the '@' syntax."
+  end
+}}}
+    
+
+  

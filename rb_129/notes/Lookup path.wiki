@@ -1,0 +1,16 @@
+= Lookup Path =
+
+Each object has a inheritance path where Ruby looks for the methods defined on that object's
+class, super classes, and mixins. When a method is called on an object, Ruby
+begins by looking in the class of the object to see if a method of that name is
+defined there. If it is found, Ruby will stop looking and execute the method.
+Otherwise it continues up the lookup path, searching each ancestor.
+
+After searching the object's class it will search modules that were mixed in to that
+class (beginning with the last defined module, moving to the first). It will
+then search the super class and modules mixed in to it. This continues up the
+inheritance chain until it reaches: Object, Kernel, and BasicObject.
+
+Ruby will stop searching as soon as a method with the correct name is found. If
+it reaches BasicObject and cannot find the method, an error will be thrown.
+

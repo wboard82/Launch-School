@@ -1,0 +1,43 @@
+=Polymorphism=
+
+Polymorphism allows two different objects to respond to the same method
+interface. This means that calling code does not need to be concerned with
+exactly what type of object is being called, only that it has certain behaviors.
+
+Example:
+
+{{{ruby
+class Fish
+  def move
+    puts "Swimming!"
+  end
+end
+
+class Dog
+  def move
+    puts "Running!"
+  end
+end
+
+class Bird
+  def move
+    puts "Flying!"
+  end
+end
+
+fish = Fish.new
+bird = Bird.new
+dog = Dog.new
+animals = [fish, bird, dog]
+
+animals.each { |animal| animal.move }
+# Swimming!
+# Flying!
+# Running!
+}}}
+
+In the above example, each object is different, but since they each have a
+`#move` method, all of them are able to respond to the call in the block passed
+to the `#each` method call. This is an example of objects with many (poly) forms
+(morphism) responding with different behaviors to the same command (method
+call.)

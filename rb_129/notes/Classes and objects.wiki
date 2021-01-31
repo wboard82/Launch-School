@@ -1,0 +1,50 @@
+=Classes and Objects=
+
+==Class==
+
+A class can be thought of as the mold from which objects are created. We say
+that an object is an instance of a class. The class defines behaviors (in the
+form of methods) of a class. It often also defines what attributes objects of
+the class will have. It is important to note that the class does not actually
+*have* these attributes. However, looking at the methods of the class,
+especially getter and setter methods, we can usually see the instance variables
+that will be assigned when an object is instantiated.
+
+==Objects==
+
+An object is an instance of a class. This means that the object has all the
+methods (behaviors) defined by a class. The object also has *state* which is
+captured by its instance variables. Instance variables are initialized within
+instance methods. Instance variables are scoped to the object. This means that
+we only have access to the variable within the object itself. The only way that
+other objects (even of the same class) can access instance variables of a class
+is through a getter or setter method (attr_accessor, attr_reader, or
+attr_writer).
+
+The sytactic sugar used by Ruby makes it appear that we have direct access to
+instance variables as in this example:
+
+{{{ruby
+class Dog
+  def intialize(name)
+    @name = name
+  end
+  
+  def name
+    @name
+  end
+  
+  def name=(new_name)
+    @name = new_name
+  end
+end
+
+spot = Dog.new('spot')
+spot.name # => 'spot'
+spot.name = 'Spot' # => 'Spot'
+}}}
+
+Above we see that it appears that we are accessing `name` directly. However,
+really the last two lines are method calls (to `#name` and `#name=`,
+respectively. It is the methods that expose and allow us to access instance
+variables.
