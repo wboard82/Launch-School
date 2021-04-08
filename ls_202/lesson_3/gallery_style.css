@@ -1,0 +1,26 @@
+body, main, figure, figcaption, img {
+  margin: 0;
+  padding: 0;
+}
+
+main {
+    background-image: url("https://d3jtzah944tvom.cloudfront.net/202/images/lesson_3/gradient-background.png");
+    background-size: cover;
+}
+
+figure {
+    display: inline-block;
+    box-sizing: border-box;
+    margin: 50px 0;
+    padding: 0 50px;
+    width: 50%;
+    vertical-align: middle;
+}
+
+figcaption {
+    text-align: center;
+}
+
+img {
+    width: 100%;
+}
