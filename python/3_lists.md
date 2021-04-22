@@ -29,7 +29,8 @@ https://docs.python.org/3/library/stdtypes.html#list
 
 ## Accessing Multiple Items (Slices)
 
-* `list_name[start_idx:up_to_idx:step_size]`
+Basic syntax: `list_name[start_idx:up_to_idx:step_size]`
+
 * Indexes 0 to 2 (not inclusive): `my_list[0:2]  # => ['a', 'b']`
 * From 2 **through** the end: `my_list[2:]  # => ['c', 'd']`
 * From the beginning **up to** 2: `my_list[:2] # => ['a', 'b']`
@@ -47,9 +48,11 @@ https://docs.python.org/3/library/stdtypes.html#list
 * Min or max: `min(my_list) # => 1` `max(my_list) # => 4`
 * Index of first occurence of object: `my_list.index(2)  # => 1`
 * Count occurences of object in list: `my_list.count(2)  # => 1`
-* 
 
 ### Adding elements:
+
+* `insert()`, `append()`, `extend()`
+* !!!
 
 
 ### Removing Elements:
@@ -73,14 +76,19 @@ https://docs.python.org/3/library/stdtypes.html#list
         * Remove every other item in list: `del my_list[::2]`
     - Using `del` with slices will not raise an error!
 
-### 
-
-
-
-+---------------+----------------------------+---------------------------+---------------------------+
-| Operation     | Python                     | Ruby                      | JS                        |
-+---------------+----------------------------+---------------------------+---------------------------+
-
-
 ## Gotchas
+
+* Creating a list programmatically with the `*` operator:
+    - !!!
+
+### Differences from Ruby
+
+* Python will throw an error in many places that Ruby returns `nil`
+* Syntax is different (i.e. `len(my_list)` vs `my_list.length`)
+* Mutating vs. non-mutating methods:
+    - In Ruby: `my_list.sort` (non-mutating) vs. `my_list.sort!` (mutating)
+    - In Python: `sorted(my_list)` (non-mutating) vs. `my_list.sort` (mutating)
+    - General rule (that I can tell so far) is that methods called **on** an
+        object may be mutating, but methods that **take** the object as an
+        argument generally are not. (I'm sure there are exceptions!)
 
