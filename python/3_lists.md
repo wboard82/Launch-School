@@ -15,10 +15,10 @@ https://docs.python.org/3/library/stdtypes.html#list
 
 ## Creating a List
 
-* Empty list: `[]` or `list()`
-* Literal: `[1]` or `[1, 'a', True]`
-* List comprehension: `[x for xs in iterable]`
-* Constructor: `list(iterable)`
+* Empty list: <br>`[]` or `list()`
+* Literal: <br>`[1]` or `[1, 'a', True]`
+* List comprehension: <br>`[x for xs in iterable]`
+* Constructor: <br>`list(iterable)`
 
 ## Accessing Single Items
 
@@ -30,18 +30,19 @@ https://docs.python.org/3/library/stdtypes.html#list
 
 ## Accessing Multiple Items (Slices)
 
-Basic syntax: `list_name[start_idx:up_to_idx:step_size]`
+Basic syntax: <br>`list_name[start_idx:up_to_idx:step_size]`
 
-* Indexes 0 to 2 (not inclusive): `my_list[0:2]  # => ['a', 'b']`
-* From 2 **through** the end: `my_list[2:]  # => ['c', 'd']`
-* From the beginning **up to** 2: `my_list[:2] # => ['a', 'b']`
-* From the beginning **up to** second-to-last: `my_list[:-2] # => ['a', 'b']`
-* When first index is omitted, `0` is used
-* When second index is omitted, `len()` is used
-* Every other item: `my_list[::2]  # => ['a', 'c']`
-* Last two items, in reverse: `my_list[-1:-3:-1]  # => ['d', 'c']`
-* Can be used to make a shallow copy of whole list: `my_list[:]` (equivalent to
-    `my_list.copy()`)
+* When start_idx is omitted, `0` is used
+* When up_to_idx is omitted, `len()` is used
+
+Some examples:
+* Indexes 0 to 2 (not inclusive): <br>`my_list[0:2]  # => ['a', 'b']`
+* From 2 **through** the end: <br>`my_list[2:]  # => ['c', 'd']`
+* From the beginning **up to** 2: <br>`my_list[:2] # => ['a', 'b']`
+* From the beginning **up to** second-to-last: <br>`my_list[:-2] # => ['a', 'b']`
+* Every other item: <br>`my_list[::2]  # => ['a', 'c']`
+* Last two items, in reverse: <br>`my_list[-1:-3:-1]  # => ['d', 'c']`
+* Can be used to make a shallow copy of whole list: <br>`my_list[:]` (equivalent to `my_list.copy()`)
 
 ## Common Operations on a List
 
