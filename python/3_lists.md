@@ -51,7 +51,27 @@ https://docs.python.org/3/library/stdtypes.html#list
 
 ### Adding elements:
 
-### Deleting elements:
+
+### Removing Elements:
+
+* Three main ways: `del`, `remove()`, and `pop()`
+* To remove a certain value use `remove()`:
+    - Removes the *first occurence* of the given value
+    - Raises an error if the value does not exist
+    - Does not return the value
+    - `my_list.remove(val)`
+* To remove *and return* element at specific index use `pop()`
+    - `my_list.pop()` removes and returns the last element
+    - `my_list.pop(1)` removes and returns the element at index `1`
+    - Raises an error if the index does not exist
+* To remove element(s) at specific index without returning it use `del`
+    - `del my_list[1]` deletes element at index `1`
+    - Raises an error if index does not exist
+    - Can be used on slices:
+        * Remove from index 1 up to 3: `del my_list[1:3]`
+        * Remove from index 2 to the end of list: `del my_list[2:]`
+        * Remove every other item in list: `del my_list[::2]`
+    - Using `del` with slices will not raise an error!
 
 ### 
 
