@@ -141,10 +141,11 @@ a.extend([4, 5, 6])
 ### Comparison to Ruby
 
 * Python will throw an error in many places that Ruby returns `nil`
-* Syntax is different (i.e. `len(my_list)` vs `my_list.length`)
+* Syntax is different (In python:`len(my_list)` In Ruby and javascript: `my_list.length`)
 * Mutating vs. non-mutating methods:
-    - In Ruby: `my_list.sort` (non-mutating) vs. `my_list.sort!` (mutating)
+    - In Ruby: `my_list.sort` (non-mutating). In python and javascript: `my_list.sort()` mutatest the original list/array
     - In Python: `sorted(my_list)` (non-mutating) vs. `my_list.sort` (mutating)
+        - In Javascript there is no one built in method we can call that combines the creation and sorting of a new array. Python makes it easier comparatively.
     - General rule (that I can tell so far) is that methods called **on** an
         object may be mutating, but methods that **take** the object as an
         argument generally are not. (I'm sure there are exceptions!)
@@ -154,6 +155,13 @@ a.extend([4, 5, 6])
     - Ruby has other ways of slicing as well:
         * `list[(begin_idx..end_idx)]`
         * `list[begin_idx, num_of_elems]`
+    - Javascript slicing:
+        * ["a", "b", "c"].slice(0, 2);  // => [ 'a', 'b' ]
+        * The python syntax different from what Javascript students are used to.  Just remember that the start index and end index specifications work the same in python and javascript.
+
+* Other Notes about Javascript
+    - You cannot specify an index to pop() a value in javascript. In JS, pop() takes no arguments and will always remove and return the last element in the array
+    - Python's append() method is the same as javscript's push() method
 
 
 
