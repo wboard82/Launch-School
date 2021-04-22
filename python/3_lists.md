@@ -55,9 +55,26 @@ Some examples:
 
 ### Adding elements:
 
-* `insert()`, `append()`, `extend()`
-* !!!
+* `insert(idx, element)`
+    - Inserts `element` at index `idx`
+    - If `idx` is greater than `len()`, `element` will be appended to end of
+        list
+* `append(element)`
+    - Appends `element` onto the end of the list
+* `extend(iterable)`
+    - `iterable` is another list or other iterable object
+    - Appends each element of `iterable` onto the list
 
+What will be the difference in result between these two pieces of code?
+```python
+a = [1, 2, 3]
+a.append([4, 5, 6])
+```
+and
+```python
+a = [1, 2, 3]
+a.extend([4, 5, 6])
+```
 
 ### Removing Elements:
 
@@ -97,7 +114,7 @@ Some examples:
     # => 140147742899584
     ```
 
-    # Reassignment of list elements work as you might expect:
+    Reassignment of list elements work as you might expect:
     ```python
     lists[2] = 3
     lists
