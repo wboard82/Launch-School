@@ -7,16 +7,18 @@ https://docs.python.org/3/library/stdtypes.html#list
 * Ordered, indexed collection of elements
 * 0 indexed
 * Holds other types, including other containers
-* May hold multiple types
+* May hold multiple types: `[1, 'a', True]`
+* May be nested: `[[1, 2], [3, 4]]`
 * Basic type, built-in to Python
-* [*Sequence* type](https://docs.python.org/3/library/stdtypes.html#list) (`tuples` and `ranges`, also `str` and others)
+* [*Sequence* type](https://docs.python.org/3/library/stdtypes.html#list) (others: `tuples` and `ranges`, also `str` and more)
 * [*Mutable sequence*](https://docs.python.org/3/library/stdtypes.html#mutable-sequence-types) type
+* [Python List Documentation](https://docs.python.org/3/library/stdtypes.html#lists)
 
 ## Creating a List
 
 * Empty list: `[]` or `list()`
 * Literal: `[1]` or `[1, 'a', True]`
-* List comprehension: `[x for x in iterable]`
+* List comprehension: `[x for xs in iterable]`
 * Constructor: `list(iterable)`
 
 ## Accessing Single Items
@@ -39,6 +41,8 @@ Basic syntax: `list_name[start_idx:up_to_idx:step_size]`
 * When second index is omitted, `len()` is used
 * Every other item: `my_list[::2]  # => ['a', 'c']`
 * Last two items, in reverse: `my_list[-1:-3:-1]  # => ['d', 'c']`
+* Can be used to make a shallow copy of whole list: `my_list[:]` (equivalent to
+    `my_list.copy()`)
 
 ## Common Operations on a List
 
@@ -79,9 +83,45 @@ Basic syntax: `list_name[start_idx:up_to_idx:step_size]`
 ## Gotchas
 
 * Creating a list programmatically with the `*` operator:
-    - !!!
 
-### Differences from Ruby
+    Creating a list of empty lists using the `*` uses the same object for each element of the list:
+    ```python
+    lists = [[]] * 3
+    lists
+    # => [[], [], []]
+
+    id(lists[0])
+    # => 140147742899584
+
+    id(lists[1])
+    # => 140147742899584
+    ```
+
+    # Reassignment of list elements work as you might expect:
+    ```python
+    lists[2] = 3
+    lists
+    # => [[], [], 3]
+    ```
+
+    But mutating a list element will affect them all:
+    ```python
+    lists = [[]] * 3
+    lists[0].append(3)
+    lists
+    # => [[3], [3], [3]]
+    ```
+
+    Use a list comprehension to create a different object in each element:
+    ```python
+    lists = [[] for x in range(3)]
+    id(lists[0])
+    # => 140147742965440
+    id(lists[1])
+    # => 140147742982528
+    ```
+
+### Comparison to Ruby
 
 * Python will throw an error in many places that Ruby returns `nil`
 * Syntax is different (i.e. `len(my_list)` vs `my_list.length`)
@@ -91,4 +131,12 @@ Basic syntax: `list_name[start_idx:up_to_idx:step_size]`
     - General rule (that I can tell so far) is that methods called **on** an
         object may be mutating, but methods that **take** the object as an
         argument generally are not. (I'm sure there are exceptions!)
+* Slicing:
+    - In Python: `lst[begin_idx:upto_idx]`
+    - Equivalent in Ruby: `lst[(begin_idx...upto_idx)]`
+    - Ruby has other ways of slicing as well:
+        * `list[(begin_idx..end_idx)]`
+        * `list[begin_idx, num_of_elems]`
+
+
 
