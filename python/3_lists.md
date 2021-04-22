@@ -12,7 +12,6 @@ https://docs.python.org/3/library/stdtypes.html#list
 * Basic type, built-in to Python
 * [*Sequence* type](https://docs.python.org/3/library/stdtypes.html#list) (others: `tuples` and `ranges`, also `str` and more)
 * [*Mutable sequence*](https://docs.python.org/3/library/stdtypes.html#mutable-sequence-types) type
-* [Python List Documentation](https://docs.python.org/3/library/stdtypes.html#lists)
 
 ## Creating a List
 
@@ -25,9 +24,9 @@ https://docs.python.org/3/library/stdtypes.html#list
 
 `my_list = ['a', 'b', 'c', 'd']`
 
-* Single item at an index: `my_list[idx]`
-* First item of a list: `my_list[0] # => 'a'`
-* Last item of a list: `my_list[-1] # => 'd'`
+* Single item at an index: <br>`my_list[idx]`
+* First item of a list: <br>`my_list[0] # => 'a'`
+* Last item of a list: <br>`my_list[-1] # => 'd'`
 
 ## Accessing Multiple Items (Slices)
 
