@@ -65,7 +65,7 @@ Some examples:
     - `iterable` is another list or other iterable object
     - Appends each element of `iterable` onto the list
 
-What will be the difference in result between these two pieces of code?
+**What will be the difference in result between these two pieces of code?**
 ```python
 a = [1, 2, 3]
 a.append([4, 5, 6])
