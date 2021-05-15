@@ -48,10 +48,10 @@ Some examples:
 
 ### Information:
 
-* Length of list: `len(my_list)  # => 4`
-* Min or max: `min(my_list) # => 1` `max(my_list) # => 4`
-* Index of first occurence of object: `my_list.index(2)  # => 1`
-* Count occurences of object in list: `my_list.count(2)  # => 1`
+* Length of list: <br>`len(my_list)  # => 4`
+* Min or max: <br>`min(my_list) # => 1` `max(my_list) # => 4`
+* Index of first occurence of object: <br>`my_list.index(2)  # => 1`
+* Count occurences of object in list: <br>`my_list.count(2)  # => 1`
 
 ### Adding elements:
 
@@ -65,7 +65,7 @@ Some examples:
     - `iterable` is another list or other iterable object
     - Appends each element of `iterable` onto the list
 
-What will be the difference in result between these two pieces of code?
+**What will be the difference in result between these two pieces of code?**
 ```python
 a = [1, 2, 3]
 a.append([4, 5, 6])
@@ -99,7 +99,7 @@ a.extend([4, 5, 6])
 
 ## Gotchas
 
-* Creating a list programmatically with the `*` operator:
+* Creating a multidimensional list with the `*` operator:
 
     Creating a list of empty lists using the `*` uses the same object for each element of the list:
     ```python
@@ -138,27 +138,27 @@ a.extend([4, 5, 6])
     # => 140147742982528
     ```
 
-### Comparison to Ruby/Javascript
+## Comparison to Ruby and JavaScript
 
+### Mutating vs. non-mutating methods
+* In Ruby: `my_list.sort!` (mutating) vs. `my_list.sort` (non-mutating)
+* In Python: `my_list.sort()` (mutating) vs. `sorted(my_list)` (non-mutating)
+* In Javascript: `my_list.sort()` (mutating) and there is no built-in non-mutating sort method
+* General rule (that I can tell so far) is that methods called **on** an object may be mutating, but methods that **take** the object as an
+        argument generally are not. (I'm sure there are exceptions!)
+### Slicing
+* In Python: `lst[begin_idx:upto_idx]`
+* Equivalent in Ruby: `lst[(begin_idx...upto_idx)]`
+* Ruby has other ways of slicing as well:
+   * `list[(begin_idx..end_idx)]`
+   * `list[begin_idx, num_of_elems]`
+* Javascript slicing:
+   * ["a", "b", "c"].slice(0, 2);  // => [ 'a', 'b' ]
+   * The Python syntax different from what Javascript students are used to.  Just remember that the start index and end index specifications work the same in python and javascript.
+
+### Other notes:
 * Python will throw an error in many places that Ruby returns `nil`
 * Syntax is different (In python:`len(my_list)` In Ruby and javascript: `my_list.length`)
-* Mutating vs. non-mutating methods:
-    - In Ruby: `my_list.sort` (non-mutating). In python and javascript: `my_list.sort()` mutatest the original list/array
-    - In Python: `sorted(my_list)` (non-mutating) vs. `my_list.sort` (mutating)
-        - In Javascript there is no one built in method we can call that combines the creation and sorting of a new array. Python makes it easier comparatively.
-    - General rule (that I can tell so far) is that methods called **on** an
-        object may be mutating, but methods that **take** the object as an
-        argument generally are not. (I'm sure there are exceptions!)
-* Slicing:
-    - In Python: `lst[begin_idx:upto_idx]`
-    - Equivalent in Ruby: `lst[(begin_idx...upto_idx)]`
-    - Ruby has other ways of slicing as well:
-        * `list[(begin_idx..end_idx)]`
-        * `list[begin_idx, num_of_elems]`
-    - Javascript slicing:
-        * ["a", "b", "c"].slice(0, 2);  // => [ 'a', 'b' ]
-        * The python syntax different from what Javascript students are used to.  Just remember that the start index and end index specifications work the same in python and javascript.
-
 * Other Notes about Javascript
     - You cannot specify an index to pop() a value in javascript. In JS, pop() takes no arguments and will always remove and return the last element in the array
     - Python's append() method is the same as javscript's push() method
