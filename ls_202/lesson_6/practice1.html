@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en-US">
+    <head>
+        <title>Practice Problems</title>
+        <meta charset="utf-8" />
+        <style>
+html {
+    font-size: 20px;
+    padding: 0;
+}
+
+body {
+    padding 0;
+}
+
+p {
+    font-size: 1rem;
+}
+
+#positioned {
+    background-color: lightblue;
+    display: inline-block;
+    position: fixed;
+    margin-left: -200px;
+    padding: 30px 15px;
+    top: 20px;
+    width: 400px;
+    left: 50%;
+    z-index: 3;
+}
+
+#screen {
+    z-index: 2;
+    background-color: rgba(0, 0, 0, .6);
+    margin: 0;
+    padding: 0;
+    display: block;
+    height: 100%;
+    width: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+}
+
+#corner {
+  background-color: pink;
+  height: 20px;
+  width: 20px;
+  position: absolute;
+  top: -10px;
+  left: -10px;
+}
+
+        </style>
+    </head>
+    <body>
+        <div id="positioned">
+            <div id="corner"></div>
+            I'm positioned!
+        </div>
+        <div id="screen"></div>
+        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed vel mauris eu urna gravida pulvinar. Sed feugiat justo odio, at laoreet tortor consequat pretium. Maecenas finibus ut ex eu interdum. Aenean et magna vitae ante luctus luctus a ut tortor. Sed rhoncus nisl quis nisl pretium, vitae malesuada enim consectetur. Etiam pulvinar dui vitae neque egestas varius. Suspendisse interdum efficitur felis in venenatis. Quisque purus odio, lobortis in congue eget, pretium facilisis est. Sed quam tellus, sollicitudin porttitor nisi nec, sollicitudin posuere est. Fusce vel turpis massa. Donec porttitor dolor nibh, ac varius est tincidunt pellentesque. Suspendisse nec tellus euismod, gravida nibh quis, eleifend ligula.</p>
+        <p>Donec dapibus arcu dignissim, convallis ante nec, pharetra magna. Phasellus eget maximus massa, nec volutpat purus. Donec mattis imperdiet nisi in tempus. Cras porta quam diam, non accumsan massa dictum ac. Quisque id tristique lacus, in ullamcorper urna. Curabitur tristique in dui nec vehicula. Curabitur a sagittis elit, non bibendum quam. Integer euismod dolor ut purus luctus iaculis. Vivamus ac ante finibus, rhoncus felis in, luctus urna. Nam enim dui, euismod sed suscipit vitae, tempor sit amet enim. Morbi eu tellus justo. Nam venenatis consequat molestie. Etiam lacinia gravida enim, quis varius odio rhoncus vitae. Maecenas molestie, ex quis condimentum posuere, ipsum lacus efficitur orci, nec porttitor urna tellus vel elit.</p>
+        <p>Praesent tincidunt venenatis nisl eget tempor. Vestibulum ac nulla laoreet, sodales dolor vel, faucibus mauris. Praesent sodales fringilla commodo. Mauris eget libero lectus. Maecenas fringilla purus a interdum ullamcorper. In ultricies auctor elit nec ultrices. Aenean venenatis ullamcorper metus, nec faucibus ligula interdum at.</p>
+        <p>Etiam at massa vitae diam pulvinar lacinia quis ac ligula. Donec magna lectus, bibendum sit amet consectetur eget, molestie ut quam. Donec blandit rhoncus ligula nec finibus. Mauris suscipit nibh quam, ac mollis ipsum condimentum non. Maecenas mattis magna et vehicula vulputate. Morbi mollis lobortis elit ut facilisis. Vivamus ac posuere nunc. Suspendisse vestibulum tortor suscipit, malesuada nulla vel, ullamcorper risus. Quisque volutpat eros elit, at porta nisl sagittis at. Praesent dapibus ornare gravida. Phasellus ultricies metus sed tortor egestas, et feugiat tortor molestie. Curabitur sit amet ipsum in massa convallis tempus eu sit amet dolor. Integer condimentum ac odio id ullamcorper. In hac habitasse platea dictumst. Nunc vel sodales augue, vitae sagittis quam.</p>
+        <p>Donec luctus dignissim massa egestas auctor. Curabitur non arcu imperdiet, vehicula augue vitae, ultricies elit. Integer ac lectus quam. Aenean hendrerit lectus est, id gravida lorem molestie nec. Integer tincidunt eget leo at consectetur. Mauris at lacus aliquet, convallis libero eget, tincidunt eros. Proin ac velit tortor. Aliquam non ultricies dolor, quis facilisis erat.</p>
+        <p>Nam luctus neque et mauris feugiat, eget mollis dui rhoncus. Proin sapien lacus, sodales eu purus at, pellentesque pretium ipsum. Nunc tristique lectus eu augue efficitur, eu eleifend metus viverra. Duis lobortis sollicitudin quam, suscipit tempus ligula condimentum sit amet. Ut placerat sed metus eget mollis. Maecenas neque nisi, dignissim nec odio in, feugiat eleifend nunc. Duis at augue eros. Fusce massa est, dignissim nec pharetra luctus, euismod ut eros.</p>
+        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed vel mauris eu urna gravida pulvinar. Sed feugiat justo odio, at laoreet tortor consequat pretium. Maecenas finibus ut ex eu interdum. Aenean et magna vitae ante luctus luctus a ut tortor. Sed rhoncus nisl quis nisl pretium, vitae malesuada enim consectetur. Etiam pulvinar dui vitae neque egestas varius. Suspendisse interdum efficitur felis in venenatis. Quisque purus odio, lobortis in congue eget, pretium facilisis est. Sed quam tellus, sollicitudin porttitor nisi nec, sollicitudin posuere est. Fusce vel turpis massa. Donec porttitor dolor nibh, ac varius est tincidunt pellentesque. Suspendisse nec tellus euismod, gravida nibh quis, eleifend ligula.</p>
+        <p>Nam luctus neque et mauris feugiat, eget mollis dui rhoncus. Proin sapien lacus, sodales eu purus at, pellentesque pretium ipsum. Nunc tristique lectus eu augue efficitur, eu eleifend metus viverra. Duis lobortis sollicitudin quam, suscipit tempus ligula condimentum sit amet. Ut placerat sed metus eget mollis. Maecenas neque nisi, dignissim nec odio in, feugiat eleifend nunc. Duis at augue eros. Fusce massa est, dignissim nec pharetra luctus, euismod ut eros.</p>
+    </body>
+</html>
+

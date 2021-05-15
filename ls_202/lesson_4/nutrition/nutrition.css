@@ -1,4 +1,4 @@
-ul, ol, li, h1, h2, h3, h4, h5, h6, pre, form, body, html, p, blockquote, fieldset, input, dl, dt, dd, figure, figcaption {
+h1, h2, body, html, p, dl, dt, dd {
 margin: 0;
 padding: 0;
 }
@@ -8,17 +8,15 @@ html {
 }
 
 body {
-    width: 684px;
-    height: 1342px;
+    box-sizing: border-box;
+    width: 680px;
     border: 2px solid black;
-    padding: 10px;
-    margin: 10px;
+    padding: 12px 16px;
+    margin: 8px;
 }
 
 h1 {
-    font-family: "Franklin Gothic Heavy", "Arial Black", sans-serif;
-    font-size: 2rem;
-    font-weight: bold;
+    font: bold 2rem "Franklin Gothic Heavy", "Arial Black", sans-serif;
 }
 
 h2 {
@@ -32,7 +30,7 @@ h2 {
 
 header dl {
     display: inline-block;
-    border-bottom: .6rem solid black;
+    border-bottom: 16px solid black;
     width: 50%;
     padding: 2px 0;
 }
@@ -49,10 +47,20 @@ table {
     border-collapse: collapse;
     width: 100%;
     padding: 5px;
+    margin: 10px 0;
+}
+
+th[colspan="3"] {
+    text-align: right;
 }
 
 td, th {
     border-bottom: 1px solid black;
+    padding: 2px 0;
+}
+
+th dt {
+    font-weight: bold;
 }
 
 th[scope="row"] {
@@ -73,20 +81,30 @@ dd {
     font-weight: normal;
 }
 
+table:not(.daily_values) tbody:first-of-type td:last-of-type {
+    text-align: right;
+    font-weight: bold;
+}
+
+tbody:nth-of-type(2) td:last-of-type {
+    text-align: right;
+}
+
+caption {
+    margin-top: 12px;
+    padding-left: 18px;
+    font-size: .9rem;
+    text-align: left;
+    text-indent: -.75em;
+    caption-side: bottom;
+}
+
 tbody + tbody {
     border-top: 20px solid black;
 }
 
 sup {
     vertical-align: text-top;
-}
-
-caption {
-    padding-left: 2em;
-    font-size: .9rem;
-    text-align: left;
-    text-indent: -.75em;
-    caption-side: bottom;
 }
 
 table.daily_values {
@@ -101,6 +119,10 @@ table.daily_values th {
 
 table.daily_values td:nth-child(2) {
     text-align: center;
+}
+
+table.daily_values td:first-child {
+    padding-left: 1.5em;
 }
 
 table.daily_values thead {

@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en-US">
+    <head>
+        <title>Contact Form</title>
+        <meta charset="utf-8" />
+        <link rel="stylesheet" href="contact_style.css">
+    </head>
+    <body>
+        <div id="page_content">
+            <form action="#" method="post">
+                <fieldset>
+                    <dl class="partial first">
+                        <dt><label for="first_name">First Name</label></dt>
+                        <dd><input type="text" id="first_name" name="first_name" /></dd>
+                    </dl><!--
+                 --><dl class="partial last">
+                        <dt><label for="last_name">Last Name</label></dt>
+                        <dd><input type="text" name="last_name" id="last_name" /></dd>
+                    </dl>
+                    <dl>
+                        <dt><label for="email">Email Address</label></dt>
+                        <dd><input type="email" name="email" id="email" /></dd>
+                    </dl>
+                    <dl class="partial city">
+                        <dt><label for="city">City</label></dt>
+                        <dd><input type="text" id="city" name="city" /></dd>
+                    </dl><!--
+                  --><dl class="partial state">
+                        <dt><label for="state">State</label></dt>
+                        <dd>
+                        <select name="state" id="state" required>
+                            <option>AK</option>
+                            <option>AL</option>
+                            <option>AR</option>
+                            <option>AZ</option>
+                            <option>CA</option>
+                            <option>CO</option>
+                            <option>CT</option>
+                            <option>DC</option>
+                            <option>DE</option>
+                            <option>FL</option>
+                            <option>GA</option>
+                            <option>HI</option>
+                            <option>IA</option>
+                            <option>ID</option>
+                            <option>IL</option>
+                            <option>IN</option>
+                            <option>KS</option>
+                            <option>KY</option>
+                            <option>LA</option>
+                            <option>MA</option>
+                            <option>MD</option>
+                            <option>ME</option>
+                            <option>MI</option>
+                            <option>MN</option>
+                            <option>MO</option>
+                            <option>MS</option>
+                            <option>MT</option>
+                            <option>NC</option>
+                            <option>ND</option>
+                            <option>NE</option>
+                            <option>NH</option>
+                            <option>NJ</option>
+                            <option>NM</option>
+                            <option>NV</option>
+                            <option>NY</option>
+                            <option>OH</option>
+                            <option>OK</option>
+                            <option>OR</option>
+                            <option>PA</option>
+                            <option>RI</option>
+                            <option>SC</option>
+                            <option>SD</option>
+                            <option>TN</option>
+                            <option>TX</option>
+                            <option>UT</option>
+                            <option>VA</option>
+                            <option>VT</option>
+                            <option>WA</option>
+                            <option>WI</option>
+                            <option>WV</option>
+                            <option>WY</option>
+                        </select>
+                        </dd>
+                    </dl><!--
+                 --><dl class="partial zip">
+                        <dt><label for="zip">Zip Code</label></dt>
+                        <dd><input type="text" id="zip" name="zip" pattern="[0-9]{5}"
+                                                                   placeholder="12345" title="5-digit zip" required /></dd>
+                    </dl>
+
+                    <dl>
+                        <dt>Which of these colors do you like the best?</dt>
+                        <dd>
+                        <ul>
+                            <li><label><input type="radio" name="color" value="red" checked />Red</label></li>
+                            <li><label><input type="radio" name="color" value="orange" />Orange</label></li>
+                            <li><label><input type="radio" name="color" value="yellow" />Yellow</label></li>
+                            <li><label><input type="radio" name="color" value="green" />Green</label></li>
+                            <li><label><input type="radio" name="color" value="blue" />Blue</label></li>
+                            <li><label><input type="radio" name="color" value="indigo" />Indigo</label></li>
+                            <li><label><input type="radio" name="color" value="violet" />Violet</label></li>
+                        </ul>
+                        </dd>
+                    </dl>
+                    <dl>
+                        <dt>Which web technologies do you want to learn?</dt>
+                        <dd>
+                        <ul>
+                            <li><label><input type="checkbox" name="html" />HTML</label></li>
+                            <li><label><input type="checkbox" name="css" />CSS</label></li>
+                            <li><label><input type="checkbox" name="JavaScript" />JavaScript</label></li>
+                            <li><label><input type="checkbox" name="Ruby" />Ruby</label></li>
+                            <li><label><input type="checkbox" name="Rails" />Rails</label></li>
+                        </ul>
+                    </dl>
+                    <dl>
+                        <dt><label for="comments">Comments</label></dt>
+                        <dd><textarea name="comments" cols="80"
+                                                      rows="6"></textarea></dd>
+                    </dl>
+
+
+                    <input type="hidden" name="timestamp" value="2021-4-10">
+
+                    <button type="submit">Submit</button>
+                    <button type="reset">Reset</button>
+                </fieldset>
+            </form>
+        </div>
+    </body>
+</html>
+

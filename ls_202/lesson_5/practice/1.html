@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en-US">
+    <head>
+        <title>Contact Form</title>
+        <meta charset="utf-8" />
+        <style>
+            dt, dd, label, input, select {
+                padding: 0;
+                margin: 0;
+            }
+            dt, dd {
+                display: inline-block;
+            }
+            
+            dl {
+                width: 100%
+            }
+
+            dt {
+                width: 100px;
+            }
+
+            dt {
+                text-align: right;
+            }
+
+            .top-bottom dt,
+            .top-bottom dd {
+                display: block;
+            }
+
+            .top-bottom dt {
+                text-align: left;
+            }
+
+            
+        </style>
+    </head>
+    <body>
+        <form action="#" method="post">
+            <fieldset>
+                <dl>
+                    <dt><label for="first_name">First Name</label></dt>
+                    <dd><input type="text" id="first_name" name="first_name" required /></dd>
+
+                    <dt><label for="last_name">Last Name</label></dt>
+                    <dd><input type="text" id="last_name" name="last_name" required /></dd>
+                </dl>
+
+                <dl>
+                    <dt><label for="email">Email Address</label></dt>
+                    <dd>
+                    <input type="email" id="email" name="email"
+                    autocomplete="off" autocorrect="off" required />
+                    </dd>
+
+                    <dt><label for="phone">Phone Number</label></dt>
+                    <dd><input type="tel" id="phone" name="phone" required 
+                                placeholder="(XXX) XXX-XXXX" /></dd>
+
+                    <dt><label for="phone_type">Phone Type</label></dt>
+                    <dd>
+                        <select id="phone_type" name="phone_type">
+                            <option value="home" selected>Home</option>
+                            <option value="business">Business</option>
+                            <option value="mobile">Mobile</option>
+                        </select>
+                    </dd>
+                </dl>
+                <dl class="top-bottom">
+                    <dt><label for="message">Message</label></dt>
+                    <dd><textarea id="message" name="message" cols="80" rows="6"
+                        placeholder="Type your message here."></textarea>
+                </dl>
+                
+                <input type="submit" value="Send" />
+            </fieldset>
+        </form>
+
+    </body>
+</html>
+

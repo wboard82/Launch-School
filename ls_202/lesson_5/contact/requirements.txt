@@ -1,0 +1,29 @@
+Contact Form Requirements
+
+Form Fields:
+- First name
+- Last name
+- Email address
+- State
+    - Select with two letter code options
+
+- Zipcode
+    - Exactly 5 digits
+
+- Questions:
+    - "Which of these colors do you like the best?"
+        - List of inputs to represent colors
+        - Pick precisely one
+        - Browser preselects the first
+    - "Which web technologies do you want to learn?"
+        - List to pick any number of answers
+- Comment Box
+    - 6 x 80
+
+- Submit Button
+    - "Send"
+    - send timestamp (hidden?)
+    - use constant for timestamp
+
+- Reset Form Button
+
