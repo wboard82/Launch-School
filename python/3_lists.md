@@ -138,7 +138,7 @@ a.extend([4, 5, 6])
     # => 140147742982528
     ```
 
-### Comparison to Ruby
+### Comparison to Ruby/Javascript
 
 * Python will throw an error in many places that Ruby returns `nil`
 * Syntax is different (In python:`len(my_list)` In Ruby and javascript: `my_list.length`)
