@@ -1,0 +1,7 @@
+contacts                                       calls 
++---------------------------------+            +--------------------------------------+
+|  id INTEGER           (N)(P)(D) |-----+      |  id INTEGER                (N)(P)(D) |  
+|  first_name TEXT      (N)       |     |      |  when TIMESTAMP WITHOUT TZ (N)       |
+|  last_name TEXT       (N)       |     |      |  duration INTEGER          (N)       |
+|  number VARCHAR(10)   (N)(U)    |     +------|  contact_id INTEGER        (F)(N)    |
++---------------------------------+            +--------------------------------------+
