@@ -3,14 +3,14 @@
   #
   # Data:
   # - next_moves is an array of hashes with the info about each next move:
-  # -  - { move: (the location of move made), board: the resulting board val: (the resulting value) }
+  # -  - { move: (the location of move made), board: the resulting board, val: (the resulting value) }
   #
   # Alg:
   # - Get list of empty squares and store in array emtpy_squares
   # - FOR each empty_square:
   #   - Board = get the board that results from making the move
   #   - If that board is a winner, make that move immediately
-  #   - Add to next_moves { move: current_square, board: board }
+  #   - Otherwise, add to next_moves { move: current_square, board: board }
   #
   # If marker is P1
   #  - For each next_move:
