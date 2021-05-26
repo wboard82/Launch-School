@@ -1,3 +1,5 @@
+require "pry"
+
 module Inputable
   def join_or(list, delim: ',', final: 'or')
     return list[0].to_s if list.size == 1
@@ -30,6 +32,16 @@ module Inputable
 end
 
 class Board
+  def self.copy(other)
+    new_board = new
+
+    (1..9).each do |idx|
+      new_board[idx] = other[idx].marker
+    end
+
+    new_board
+  end
+
   def initialize
     @squares = {}
     clear
@@ -155,10 +167,11 @@ class Square
 end
 
 class Player
-  attr_reader :marker, :score
+  attr_reader :marker, :score, :opponent_marker
 
-  def initialize(marker)
+  def initialize(marker, opponent_marker)
     @marker = marker
+    @opponent_marker = opponent_marker
     reset_score
   end
 
@@ -188,12 +201,107 @@ class Human < Player
 end
 
 class Computer < Player
-  def mark(board)
-    imminent_game_overs = board.imminent_game_overs
 
-    move = imminent_game_overs[marker]
-    move ||= imminent_game_overs.values[0]
-    move ||= regular_move(board)
+  # returns the minimum value of the board
+  def max_value(board)
+    # get a list of all empty squares on the board
+    unmarked_keys = board.unmarked_keys.shuffle
+
+    # create new boards for each of the empty squares with computer's marker in each empty square
+    new_boards = unmarked_keys.map do |key|
+      new_board = Board.copy(board)
+      new_board[key] = marker
+      new_board
+    end
+
+    # if any of these are a terminal board
+    #   - return the associated value
+    new_boards.each do |new_board|
+      winning_marker = board.winning_marker
+      if winning_marker == marker
+        return 1
+      elsif winning_marker == opponent_marker
+        return -1
+      elsif new_board.full?
+        return 0
+      end
+    end
+
+    # otherwise:
+    #   - go through the list of boards, calling min_value
+    #   - return the maximum value of the results
+    values = new_boards.map { |new_board| min_value(new_board) }
+
+    if values.include?(1)
+      1
+    else
+      values.sum.to_f / values.length
+    end
+  end
+
+  def min_value(board)
+    # get a list of all empty squares on the board
+    unmarked_keys = board.unmarked_keys.shuffle
+
+    # create new boards for each of the empty squares with opponent's marker in each empty square
+    new_boards = unmarked_keys.map do |key|
+      new_board = Board.copy(board)
+      new_board[key] = opponent_marker
+      new_board
+    end
+
+    # if any of these are a terminal board
+    #   - return the associated value
+    new_boards.each do |new_board|
+      winning_marker = new_board.winning_marker
+      if winning_marker == marker
+        return 1
+      elsif winning_marker == opponent_marker
+        return -1
+      elsif new_board.full?
+        return 0
+      end
+    end
+
+    # otherwise:
+    #   - go through the list of boards, calling max_value
+    #   - return the minimum value of the results
+    values = new_boards.map { |new_board| max_value(new_board) }
+
+    if values.include?(-1)
+      -1
+    else
+      values.sum.to_f / values.length
+    end
+  end
+
+  def get_minimax_move(board)
+    unmarked_keys = board.unmarked_keys.shuffle
+
+    moves_and_boards = {}
+
+    unmarked_keys.each do |key|
+      new_board = Board.copy(board)
+      new_board[key] = marker
+      moves_and_boards[key] = new_board
+    end
+
+    moves_and_boards.each do |key, board|
+      if board.winning_marker == marker
+        return key
+      end
+    end
+
+    moves_and_boards.max_by { |key, board| min_value(board) }[0]
+  end
+
+  def mark(board)
+    move = get_minimax_move(board)
+    # imminent_game_overs = board.imminent_game_overs
+
+    # move = imminent_game_overs[marker]
+    # move ||= imminent_game_overs.values[0]
+    # move ||= regular_move(board)
 
     board[move] = marker
   end
@@ -263,8 +371,8 @@ class TTTGame
   end
 
   def make_players(human_marker, computer_marker)
-    @human = Human.new(human_marker)
-    @computer = Computer.new(computer_marker)
+    @human = Human.new(human_marker, computer_marker)
+    @computer = Computer.new(computer_marker, human_marker)
     reset_current_player
   end
 
